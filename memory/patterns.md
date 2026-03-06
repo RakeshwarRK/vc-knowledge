@@ -848,3 +848,57 @@ VirtualClient.Main/profiles/
 website/docs/workloads/<workload>/
     <workload>.md, <workload>-profiles.md, <workload>-metrics.md
 ```
+
+## 73. Remove Azure-isms from Generic Components (Yang review, PR #135)
+Hardware-targeting components must be cloud-agnostic:
+```csharp
+// WRONG: VmSeries: "nvv4" — ties component to Azure
+// RIGHT: GpuModel: "mi25" — works on any machine with that GPU
+// Principle: same driver/workload should work on Azure, AWS, or bare metal
+```
+
+## 74. Parse by Column Name, Not Position (Yang review, PR #280)
+Tool output columns may reorder between versions:
+```csharp
+// WRONG: value = row[3] — positional, breaks on column reorder
+// RIGHT: value = row["utilization.gpu"] — header-based, survives schema changes
+// Especially critical for nvidia-smi, lshw, lspci output
+```
+
+## 75. Rename/Delete Output Files After Parsing (Yang review, PR #175)
+Prevent double-parsing stale results on re-runs:
+```csharp
+// After parsing results.xml → rename to results.xml.parsed
+// Without cleanup: re-run with exitcode=0 but no new output silently reports old results
+```
+
+## 76. Keep Executor Execution Linear (Yang review, PRs #192/#197)
+Don't parallelize side operations inside executors:
+```csharp
+// WRONG: Task.Run(() => UploadFile(...)) inside ExecuteAsync
+// RIGHT: collect artifacts into list, process sequentially after workload completes
+// Parallelism inside executors creates race conditions and complicates error handling
+```
+
+## 77. Put Queryable Labels in Native Telemetry Columns (Yang review, PR #197)
+Sub-scenario labels must be in Kusto-queryable columns:
+```csharp
+// WRONG: metricName = "Blender_monster_render_time" — label buried in name
+// RIGHT: scenario = "monster", metricName = "render_time" — filterable in Kusto
+```
+
+## 78. Workload-Specific Constants Stay in Workload Class (Yang review, PR #218)
+Don't pollute shared contracts with workload-specific values:
+```csharp
+// WRONG: adding JavaVersion = "17" to VirtualClient.Contracts
+// RIGHT: private const string DefaultJavaVersion = "17" in HadoopExecutor
+// Shared projects contain only truly cross-cutting constants
+```
+
+## 79. Package Manager Belongs in Profile, Not Code (Yang review, PR #461)
+Use declarative profile dependencies for OS packages:
+```json
+// WRONG: hardcoded "dnf install iptables" in C# code
+// RIGHT: LinuxPackageInstallation dependency in profile JSON with apt/dnf sections
+// Keeps executor OS-agnostic; profile declares requirements
+```
