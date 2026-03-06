@@ -1178,3 +1178,12 @@ MetricScenario and Tags exist in OpenSSL but NOT CoreMark. Not all profiles use 
 
 ### 156. Min/Max Range Parameters for Tool-Native Configs
 Always use the tool's native parameter names. Prime95 has `MinTortureFFT`/`MaxTortureFFT` (range, set equal for single FFT). Don't invent `FFTSize` abstraction — it hides the tool's range capability and doesn't match the CLI.
+
+### 157. Two Command Line Models: Profile-Specified vs Executor-Built
+**Profile-specified**: FIO, DiskSpd, Redis, Memcached, OpenSSL have `CommandLine`/`CommandArguments` in the profile with `{Param}` placeholders resolved via ApplyParameters. The profile controls the exact CLI invocation.
+**Executor-built**: Prime95, CoreMark have NO CommandLine — the executor builds the command internally from individual parameters (MinTortureFFT, ThreadCount, etc.). Use executor-built when the command structure is complex or version-dependent.
+Parameter names: `CommandLine` (most executors) vs `CommandArguments` (OpenSSL, possibly newer convention).
+
+### 158. Two Parameter Substitution Syntaxes
+`$.Parameters.X` = JSONPath reference from one Parameters block to another (e.g., `"Duration": "$.Parameters.Duration"` copies top-level Duration into action). Resolved at profile load time.
+`{X}` = ApplyParameters substitution inside string values (e.g., `"--size={FileSize}"` in CommandLine). Resolved at expression evaluation time from the merged parameter set. These are DIFFERENT systems — don't mix them up.
