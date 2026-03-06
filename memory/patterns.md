@@ -1113,3 +1113,24 @@ Profile expressions resolve in strict order: (1) well-known variables (`{Logical
 
 ### 136. Integer Division Gotcha in Calculate
 C# integer division truncates: `512/3` → `170`, not `170.67`. When computing percentages of memory, ALWAYS multiply first: `{SystemMemoryBytes} * 80 / 100` (correct) vs `{SystemMemoryBytes} / 100 * 80` (loses precision). This is real C# math — `long * int / int` stays in integer domain throughout.
+
+### 137. NetworkingWorkloadExecutor — Meta-Orchestrator Pattern
+A third client-server architecture beyond Direct Reference and Orchestrator: `NetworkingWorkloadExecutor` uses a `ToolName` parameter to dispatch to the right tool-specific sub-executor. This allows a single profile to mix NTttcp + Latte + CPS + SockPerf scenarios under one executor type. Profile pattern: "one executor type, tool selection via parameter."
+
+### 138. Per-Tool Prefixed Parameters in Combined Profiles
+When multiple tools share a profile, each gets prefixed top-level params: `SockPerfPort`/`SockPerfDuration`, `NTttcpPort`/`NTttcpDuration`, `CpsPort`/`CpsDuration`. This allows independent override of each tool's config via `--parameters` CLI. Generic `TestDuration` can serve as fallback.
+
+### 139. Network Configuration as Prerequisite Dependency
+Network workloads require system-level tuning before benchmarks: firewall disable, busy poll enable. Done via `system_config` package with platform-conditional `ExecuteCommand` steps (`config_network.sh` for Linux, `config_network.cmd` for Windows). The `EnableBusyPoll` param flows from top-level into the script command.
+
+### 140. Pre-Built Binary Packages vs Source Compilation
+Not all tools compile from source. Network tools ship as pre-built binaries in `networking.4.0.0.zip` via `DependencyPackageInstallation`. Source compilation (`WgetPackageInstallation` + build deps) is only for tools that MUST compile on-target (Redis for CPU-specific optimizations, SockPerf source is available but pre-built is preferred in the combined profile).
+
+### 141. Profiling as Cross-Cutting Scenario Concern
+Every network scenario carries `ProfilingScenario`, `ProfilingEnabled`, `ProfilingMode` params. These enable optional perf/dotnet-trace profiling. `ProfilingScenario` value typically matches Scenario name exactly. Top-level defaults: `ProfilingEnabled: false`, `ProfilingMode: "None"`.
+
+### 142. Protocol Variation Over Message Size for Latency Tools
+SockPerf varies TCP/UDP (not message size) because latency is protocol-sensitive: TCP has connection overhead, UDP is connectionless. NTttcp varies buffer sizes AND thread counts because throughput scales with both. Each tool varies the dimension most relevant to its measurement domain.
+
+### 143. ApiServer Role Restriction
+`"Roles": "Server"` on ApiServer means it only starts on Server VM. Client-server sync requires API on server side only in some profiles. This is distinct from profiles that start ApiServer on both roles.
