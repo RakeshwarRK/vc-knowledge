@@ -163,9 +163,83 @@ this.CleanupTasks.Add(() =>
 });
 ```
 
+## 11. Controller/Agent Template Method Pattern (PR #576)
+Base class handles SSH fan-out to N agents in parallel; subclasses implement per-target logic.
+```csharp
+// Base class (VirtualClientControllerComponent)
+protected override async Task ExecuteAsync(EventContext telemetryContext, CancellationToken cancellationToken)
+{
+    IEnumerable<ISshClientProxy> sshTargets = this.TryGetTargetAgentClients();
+    List<Task> agentTasks = new List<Task>();
+
+    foreach (ISshClientProxy target in sshTargets)
+    {
+        // Fan-out: one Task.Run per SSH target
+        agentTasks.Add(Task.Run(() => this.ExecuteAsync(target, telemetryContext, cancellationToken)));
+    }
+
+    await Task.WhenAll(agentTasks);
+    // Console output serialized via SemaphoreSlim after all complete
+}
+
+// Subclass only implements per-target logic
+protected abstract Task ExecuteAsync(ISshClientProxy sshTarget, EventContext telemetryContext, CancellationToken cancellationToken);
+```
+
+## 12. Parameter Passthrough for Remote Execution (PR #576)
+When executing commands on remote agents, prevent local parameter resolution:
+```csharp
+public RemoteAgentExecutor(IServiceCollection dependencies, IDictionary<string, IConvertible> parameters = null)
+    : base(dependencies, parameters)
+{
+    // CRITICAL: Prevents controller from resolving $.Parameters.* expressions
+    // These must be resolved on the remote agent where system context exists
+    this.ParametersEvaluated = true;
+}
+```
+
+## 13. Cross-Process Package Synchronization (PR #576)
+When multiple VC instances share a machine, use IsolatedPackageManager with kernel Mutex:
+```csharp
+// Mutex requires same-thread acquire/release — can't use await
+// Wrap in Task.Run with synchronous .GetAwaiter().GetResult()
+this.packageMutex.WaitOne();
+try
+{
+    await Task.Run(() => this.innerManager.GetPackageAsync(name, ct).GetAwaiter().GetResult());
+}
+finally
+{
+    this.packageMutex.ReleaseMutex();
+}
+```
+
+## 14. Automatic Behavior Inference (Bryan's principle)
+Remove user knobs when the system can infer the right behavior:
+```csharp
+// --isolated flag REMOVED from CLI
+// Instead: automatically set when SSH targets are present
+if (this.TargetAgents?.Any() == true)
+{
+    this.Isolated = true;  // Forced, not optional
+}
+```
+
+## 15. CLI Argument Rewriting for Remote Forwarding (PR #576)
+Strip controller-specific args before forwarding command to remote agent:
+```csharp
+// "VirtualClient remote --ssh user@host;pw --profile X.json --timeout=120"
+// becomes on remote: "VirtualClient --profile X.json --timeout=120"
+string targetCommand = originalArgs
+    .Where(arg => !arg.Contains("--ssh") && !arg.Contains("--agent-ssh"))
+    .Where(arg => arg != "remote");
+```
+
 ## Anti-Patterns (Never Do)
 - `File.ReadAllText(path)` → use `IFileSystem.File.ReadAllText(path)`
 - `Process.Start(...)` → use `ProcessManager.CreateProcess(...)`
 - Sharing logic between Actions, Dependencies, Monitors directly
 - Swallowing exceptions without logging or re-throwing
 - Hard-coding platform paths (use `PlatformSpecifics` helpers)
+- Resolving `$.Parameters.*` on controller side when executing remotely
+- Using `await` with `Mutex` (thread affinity requirement)
