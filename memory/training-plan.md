@@ -9,8 +9,8 @@
 ## Progress Summary
 - **Total PRs in repo**: 536 merged
 - **PRs studied (deep + rapid + review-mined)**: ~130
-- **Patterns extracted**: 79 + Bryan's review meta-patterns
-- **Sessions**: 3 (initial 11 PRs + sweep phase 1-2 + sweep phase 2-3)
+- **Patterns extracted**: 88 + Bryan's review meta-patterns
+- **Sessions**: 4 (initial 11 PRs + sweep phase 1-2 + sweep phase 2-3 + drills)
 - **Last updated**: 2026-03-06
 
 ## Phase 1: Bryan (brdeyo) — DONE
@@ -211,16 +211,32 @@ PRs #1-16, #19-21, #27, #30, #39, #59, #92, #95, #104, #118, #139, #141, #149, #
 | dheeparaj | 4 | 2 with comments — version in package install, Async naming |
 | bhagyeshpatil | 4 | 2 with comments — don't use regex when split works |
 
-## Phase 4: Future Training (after PR sweep)
+## Phase 4: Drill Training — IN PROGRESS
 
-### Immediate next opportunities
-1. **Bryan's rejected/closed-without-merge PRs** — What approaches were abandoned and why?
-2. **GitHub Issues** — Open issues reveal design intent and feature direction
-3. **Code review simulation** — Pick random new PRs, write review before seeing actual reviews
-4. **Blind workload onboarding** — Design executor/parser/profile for a tool not in VC
+### Session 4 Completed (2026-03-06)
+| Drill | Type | Score | Key Learning |
+|-------|------|-------|-------------|
+| Framework Capability Audit | Research | N/A | 32 properties, 10 virtual methods, 30+ extensions mapped |
+| 1-Issue Review (5 PRs) | Review simulation | 3/5 | Bryan reviews architecture, not implementation |
+| Blind CoreMark Parser | Parser writing | Partial | Use DataTable+GetMetrics, preserve tool metric names |
+| HPCG Profile Design | Profile design | 2/11 | 6 installation archetypes, scenario naming taxonomy |
+| Scenario Naming Survey | Research | N/A | Names describe WHAT is measured, never action verbs |
+| Unit Test Patterns | Research | N/A | 4 coverage areas, delegate-based test doubles |
+| ErrorReason Ranges | Research | N/A | 4 ranges: 100s monitor, 300s workload, 400s transient, 500+ terminal |
+
+**Patterns added**: 81-88 (total: 88)
+
+### Remaining Drill Opportunities
+1. **Profile Design Round 2** — try FIO (IO workload) and Redis (client-server) profiles blind
+2. **DataTable Parser Drill** — rewrite CoreMark using correct pattern, try NTttcp
+3. **Architecture Review Drill** — practice Bryan's architecture-level reviewing
+4. **Extension Method Usage Drill** — given a scenario, pick the right extension methods
+5. **Bryan's rejected PRs** — What approaches were abandoned and why?
+6. **GitHub Issues** — Open issues reveal design intent and feature direction
+7. **Blind workload onboarding** — Design executor/parser/profile for a tool not in VC
 
 ### Longer-term
-5. **CRC SDK comparison** — When user is ready, create separate knowledge repo
-6. **Cross-cutting refactor practice** — E.g., migrate all parsers to new verbosity (real task)
-7. **Performance PRs** — Any PRs focused on caching, parallelism, memory optimization
-8. **Architecture decision records** — Document why VC chose X over Y for major decisions
+8. **CRC SDK comparison** — When user is ready, create separate knowledge repo
+9. **Cross-cutting refactor practice** — E.g., migrate all parsers to new verbosity (real task)
+10. **Performance PRs** — Any PRs focused on caching, parallelism, memory optimization
+11. **Architecture decision records** — Document why VC chose X over Y for major decisions
