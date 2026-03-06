@@ -1013,7 +1013,7 @@ Warmup scenarios set `WarmUp: true` to suppress performance metrics for pre-popu
 ### 105. ApiServer Dependency for Client-Server
 Client-server workloads ALWAYS need `ApiServer` in Dependencies for cross-machine coordination. Enables heartbeat polling, state synchronization, and IP/port discovery between client and server VMs.
 
-## Patterns 106-111: Redis/Memcached Comparison & Review Calibration (Session 5)
+## Patterns 106-111: Redis/Memcached Comparison & Review Calibration (Session 5): Redis/Memcached Comparison & Review Calibration (Session 5)
 
 ### 106. TLS Cross-Cutting Propagation
 When TLS is a dimension, IsTLSEnabled must appear on EVERY component: server executor, ALL client executors (including warmups), the compile step, and TLS resources dependency. Missing on one component = silent plaintext fallback.
@@ -1033,3 +1033,33 @@ Bryan demands explicit evidence that ALL affected files were found. PR descripti
 
 ### 111. Fault Tolerance Over Precision (Yang's Principle)
 When a dependency lookup can fail (env var missing, tool not in PATH), provide a sensible default rather than throwing. Yang on PR #458: "assume compiler version is 10 (use gcc>10 workaround)" — pragmatic resilience over precise detection.
+
+## Patterns 112-120: Network Client-Server Deep Dive (Session 5)
+
+### 112. Two Client-Server Executor Architectures
+1. **Direct reference** (Redis/Memcached): Profile lists separate Types for server and client, framework routes by Role.
+2. **Orchestrator** (SockPerf, NTttcp, CPS): Single Type, executor checks own role, creates sub-executors via `CreateWorkloadClient()`/`CreateWorkloadServer()` virtual methods.
+
+### 113. 6-Step Client-Server Sync Protocol
+Canonical client flow: (1) PollForHeartbeatAsync, (2) PollForServerOnlineAsync, (3) ResetServerAsync, (4) SendInstructionsAsync(StartExecution), (5) PollForExpectedStateAsync(ExecutionStarted), (6) ExecuteClientAsync, (finally) ResetServerAsync + PollForStateDeletedAsync.
+
+### 114. Instructions-Based Server Communication
+Network2 executors use `Instructions` objects: `ClientServerReset` (stop workloads) and `ClientServerStartExecution` (start specified workload). Instructions carry the full Parameters dictionary.
+
+### 115. Server State Machine via Local API
+Server publishes state: Ready → ExecutionStarted (when process detected running) → Deleted (on reset). Client polls for these transitions. State is a typed object stored through the self-hosted API.
+
+### 116. Background Server with Explicit Kill
+Network servers run indefinitely via `WaitAsync(cancellationToken)`. Must `SafeKill` in finally block. Exit code 137 (SIGKILL) treated as success for servers.
+
+### 117. ProcessStartRetryPolicy for Port Binding
+Transient port conflicts (TIME_WAIT from previous runs) handled via retry with exponential backoff. Policy matches specific error message strings.
+
+### 118. Workload Timeout = WarmupTime + 2×TestDuration
+Absolute timeout prevents stuck workloads. 2× multiplier gives headroom for slow finalization.
+
+### 119. Results File Polling
+When tools write to file (not stdout), poll for file existence + non-empty content with timeout. Catch IOException (file still being written). Throw WorkloadResultsException on timeout.
+
+### 120. SetIfNotDefined vs GetValue Default
+`Parameters.SetIfNotDefined(name, value)` writes the default INTO the dictionary (visible to other readers). `GetValue<T>(name, default)` returns default without writing. Use SetIfNotDefined when the default must be forwarded to sub-executors or serialized.
