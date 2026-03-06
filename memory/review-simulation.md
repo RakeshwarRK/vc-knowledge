@@ -68,7 +68,10 @@
 | 11 | OpenSSL profile blind design | 5.0/10 — algorithm coverage perfect | 144-148 |
 | 12 | CoreMark profile blind design | 3.7/10 — over-applied patterns | 149-153 |
 | 13 | Scenario naming synthesis (15 profiles) | 6 naming rules derived | 154 |
-| 14 | Prime95 profile blind design | **6.9/10** — best score yet | 155-156 |
+| 14 | Prime95 profile blind design | 6.9/10 — best score yet | 155-156 |
+| 15 | Command line pattern analysis (7 profiles) | Two models identified | 157-158 |
+| 16 | Dependency catalog drill (18 profiles) | 21 types, 7 combinations | 159-160 |
+| 17 | LMBench profile blind design | **7.1/10 — first >70%!** | 161-164 |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -79,4 +82,4 @@
 | 4a (drills) | 8 | 88 |
 | 4b (deep drills) | 10 | 98 |
 | 5 (mastery drills) | 38 | 136 |
-| 5c (continued) | 20 | **156** |
+| 5c (continued) | 28 | **164** |
