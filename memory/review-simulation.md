@@ -59,6 +59,7 @@
 | 6 | Yang calibration (10 PRs) | Decision tree built | (yang-taxonomy.md) |
 | 7 | Domain knowledge (6 workloads) | WHY for all params | 121-127 |
 | 8 | Edge case patterns (6 categories) | Process/retry/cleanup | 128-132 |
+| 9 | Calculate expression deep dive | Roslyn CSharpScript, 3-phase eval | 133-136 |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -68,4 +69,4 @@
 | 3 (sweep 2-3) | 28 | 79 |
 | 4a (drills) | 8 | 88 |
 | 4b (deep drills) | 10 | 98 |
-| 5 (mastery drills) | 34 | **132** |
+| 5 (mastery drills) | 38 | **136** |
