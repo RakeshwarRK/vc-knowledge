@@ -1215,3 +1215,9 @@ LMBench uses `"(4-cores)=04:00:00,(16-cores)=10:00:00,(64-cores)=16:00:00"` — 
 
 ### 164. Executor Type Name Casing Must Match Exactly
 `LMbenchExecutor` (lowercase 'b'), not `LMBenchExecutor`. Type names in profiles must match the C# class name exactly. When in doubt, check the source code for the exact casing.
+
+### 165. Network Profile v1→v2 Evolution
+PERF-NETWORK.json (v1) uses `NetworkingWorkloadExecutor` (meta-orchestrator) with `ToolName` dispatch. PERF-NETWORK-2.json (v2) uses typed executors (`SockPerfClientExecutor2`, `NTttcpClientExecutor2`, `CPSClientExecutor2`) with explicit `Role: "Client"` and a `NetworkingWorkloadProxy` for the server. This shows the framework migrating from meta-orchestrators to direct role-typed executors — the v2 pattern is preferred for new profiles.
+
+### 166. Executor Runtime Environment Setup
+OpenSSL executor sets `LD_LIBRARY_PATH` on Linux and appends to `PATH` on Windows. This is done in the executor, not the profile. Executors handle platform-specific environment variable setup so profiles stay clean. Similarly, `-multi {ProcessorCount}` is injected by the executor, not specified in profile CommandArguments.
