@@ -442,3 +442,115 @@ Remove unused constants, dictionaries, arrays with no backward-compat shims:
 // SysbenchExecutor.SelectWorkloads array — deleted
 // No re-exports, no "// removed" comments, no deprecation period
 ```
+
+## 34. Dual-Scope Metadata Registry (PR #158)
+Metadata at two scopes — persisted (app lifetime) and instance (component lifetime):
+```csharp
+// Persisted: lives across entire VC execution
+MetadataContract.Persist(new Dictionary<string, object> { ["os"] = "linux" }, MetadataContractCategory.Host);
+
+// Instance: per-component, overrides persisted on conflict
+this.MetadataContract.Add(new Dictionary<string, object> { ["tool"] = "fio" }, MetadataContractCategory.Scenario);
+
+// Apply: instance wins over persisted
+this.MetadataContract.Apply(telemetryContext);
+```
+Categories: Default, Dependencies, Host, Runtime, Scenario.
+
+## 35. Best-Effort Hardware Discovery (PR #158)
+System discovery must never crash the workload:
+```csharp
+try { memoryChips = await systemManagement.GetMemoryChipsAsync(ct); }
+catch { logger.LogWarning("Memory discovery failed"); }
+// Continue with empty/partial metadata — never block the benchmark
+```
+
+## 36. Platform-Specific Monitor Pattern (PR #486)
+Same interface, different acquisition strategies per platform:
+```csharp
+// Windows: push-model via EventLogWatcher callback + BlockingCollection queue
+eventWatcher.EventRecordWritten += this.EventWritten;
+
+// Linux: pull-model via journalctl polling with --since checkpoint
+journalctl --since "{lastCheckpoint}" --output json
+```
+Both cap at MaxEventsPerTelemetryCapture=50 per batch.
+
+## 37. Fail-Fast as Exception Filter Widening (PR #163)
+Don't add new error handling — widen the existing catch filter:
+```csharp
+// The catch clause already existed for terminal errors (>=500)
+// --fail-fast simply widens it to include ALL errors
+catch (VirtualClientException exc) when ((int)exc.Reason >= 500 || this.FailFast)
+{
+    throw;  // Propagate instead of logging and continuing
+}
+```
+Applies to Actions only. Dependencies always fail-fast. Monitors never fail-fast.
+
+## 38. Avoid Shared Mutable State in Recursive Component Creation (PR #503)
+When building component hierarchies, assign to each component immediately:
+```csharp
+// WRONG: accumulate in shared variable, gets overwritten by next sibling
+extensions.AddRange(componentDescription.Extensions, withReplace: false);
+
+// RIGHT: assign directly to the component being created
+component.Extensions.AddRange(componentDescription.Extensions, withReplace: false);
+
+// Pass component's own resolved extensions to children, not the shared variable
+CreateComponent(..., component.Extensions, ...);
+```
+
+## 39. SafeKill Inside Using Block, Not in CleanupTasks (PR #618)
+Process ID becomes 0 after dispose — `kill -9 0` kills everything:
+```csharp
+// WRONG: CleanupTasks.Add(() => processManager.SafeKill(process));
+// After dispose, process.Id == 0 → kill -9 0 kills VC itself!
+
+// RIGHT: SafeKill inside the using block's finally
+using (IProcessProxy process = ...)
+{
+    try { await process.StartAndWaitAsync(ct); }
+    finally
+    {
+        process.Close();
+        process.SafeKill(this.Logger, TimeSpan.FromSeconds(30));
+    }
+}
+```
+
+## 40. Create Core Directories at Startup (PR #631)
+Race condition prevention — ensure logs/packages/temp exist before any component runs:
+```csharp
+// In CommandBase.InitializeDependencies(), before any profile execution
+this.CreateCoreDirectories(platformSpecifics, fileSystem);
+// Prevents: "directory not found" when first workload tries to write logs
+```
+
+## 41. ParallelLoopExecution vs ParallelExecution (Yang, PR #429)
+Two parallel execution models:
+```csharp
+// ParallelExecution: run all children once in parallel
+// ParallelLoopExecution: run all children in independent loops until timeout
+protected override Task ExecuteAsync(...)
+{
+    foreach (var component in this)
+        componentTasks.Add(ExecuteComponentLoopAsync(component, ...));
+    return Task.WhenAll(componentTasks);
+}
+// Each component restarts after completion; first to timeout breaks
+```
+
+## 42. Original Verbosity System (Yang, PR #412)
+Yang's original 0/1/2 verbosity with switch-case filtering:
+```csharp
+// This was later replaced by RakeshwarK's #636 (1/2/5 scale with regex)
+switch (verbosityFilter.ToLower())
+{
+    case "verbosity:0": filteredMetrics = m => m.Verbosity <= 0; break;
+    case "verbosity:1": filteredMetrics = m => m.Verbosity <= 1; break;
+    case "verbosity:2": filteredMetrics = m => m.Verbosity <= 2; break;
+    default: return empty;
+}
+```
+Lesson: Yang built the foundation; #636 generalized it with int.TryParse and regex.
