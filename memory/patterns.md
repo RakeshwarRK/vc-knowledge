@@ -1101,3 +1101,15 @@ Flow-level retry (3 retries) wraps the entire client workflow (connect, get stat
 
 ### 132. Delete Results Before Run, Not After
 Geekbench deletes results file BEFORE executing, not after. If the new run crashes, you get a clean "no results" error instead of silently parsing stale previous-run results.
+
+### 133. Calculate Expression Uses Roslyn CSharpScript
+`{calculate(...)}` is evaluated by `Microsoft.CodeAnalysis.CSharp.Scripting.CSharpScript.EvaluateAsync<object>()` — it compiles and executes real C# code at runtime. This means full C# expression syntax works: method calls (`"linux-x64".StartsWith("linux")`), casts (`(double)322.5/5`), ternary (`true ? "yes" : "no"`). Bool results are auto-lowercased to `true`/`false`.
+
+### 134. Three-Phase Expression Evaluation Order
+Profile expressions resolve in strict order: (1) well-known variables (`{LogicalCoreCount}`, `{Platform}`, `{PackagePath:x}`), (2) parameter cross-references (`{ThreadCount}`, `{Port}`), (3) calculate expressions. Each phase loops up to 5 iterations for nested resolution. This is WHY `{calculate(512/{ThreadCount})}` works — `{ThreadCount}` resolves in phase 2 before calculate runs in phase 3.
+
+### 135. Platform Ternary Pattern
+`{calculate("{Platform}".StartsWith("linux") ? "libaio" : "windowsaio")}` — strings inside calculate MUST be quoted because after phase 1 substitution, CSharpScript sees `"linux-x64".StartsWith("linux")`. Used in FIO (IO engine), SPECCPU (benchmark selection), and SPECCPU (compiler flags by architecture). Single profile → cross-platform.
+
+### 136. Integer Division Gotcha in Calculate
+C# integer division truncates: `512/3` → `170`, not `170.67`. When computing percentages of memory, ALWAYS multiply first: `{SystemMemoryBytes} * 80 / 100` (correct) vs `{SystemMemoryBytes} / 100 * 80` (loses precision). This is real C# math — `long * int / int` stays in integer domain throughout.
