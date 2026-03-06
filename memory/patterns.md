@@ -1187,3 +1187,19 @@ Parameter names: `CommandLine` (most executors) vs `CommandArguments` (OpenSSL, 
 ### 158. Two Parameter Substitution Syntaxes
 `$.Parameters.X` = JSONPath reference from one Parameters block to another (e.g., `"Duration": "$.Parameters.Duration"` copies top-level Duration into action). Resolved at profile load time.
 `{X}` = ApplyParameters substitution inside string values (e.g., `"--size={FileSize}"` in CommandLine). Resolved at expression evaluation time from the merged parameter set. These are DIFFERENT systems — don't mix them up.
+
+### 159. Dependency Type Decision Tree (21 types, 7 patterns)
+**Package installation**: DependencyPackageInstallation (blob store, most common), LinuxPackageInstallation (apt/yum), WgetPackageInstallation (URL download), GitRepoClone (git repo), ChocolateyInstallation/ChocolateyPackageInstallation (Windows), JDKPackageDependencyInstallation (Java).
+**Build**: CompilerInstallation (GCC), ExecuteCommand (make/configure escape hatch).
+**Disk**: FormatDisks → MountDisks (always paired, IO/DB workloads).
+**Runtime**: ApiServer (client-server, always last), DockerInstallation, NvidiaCudaInstallation + NvidiaContainerToolkitInstallation (GPU stack).
+**DB-specific**: MySQLServerInstallation/Configuration, PostgreSQLServerInstallation/Configuration, SysbenchConfiguration, HammerDBExecutor (as dependency).
+
+### 160. Seven Dependency Combination Patterns
+1. **Simple binary**: DependencyPackageInstallation only (Prime95, Geekbench)
+2. **Cross-platform**: LinuxPackageInstallation + FormatDisks/MountDisks + DependencyPackageInstallation with SupportedPlatforms filter (FIO)
+3. **Build-from-source**: LinuxPackageInstallation (build deps) → WgetPackageInstallation/GitRepoClone (source) → ExecuteCommand (compile) → ApiServer (Redis, Memcached)
+4. **Database**: FormatDisks/MountDisks → LinuxPackageInstallation → DependencyPackageInstallation × 2 → DBServerInstallation → DBServerConfiguration × N → BenchmarkConfiguration → ApiServer
+5. **GPU**: FormatDisks → GitRepoClone → NvidiaCudaInstallation → DockerInstallation → NvidiaContainerToolkitInstallation
+6. **Compilation workload**: ChocolateyInstallation → ChocolateyPackageInstallation (Cygwin) → CompilerInstallation → DependencyPackageInstallation (SPEC CPU)
+7. **Network**: DependencyPackageInstallation × 2 (config + tools) → LinuxPackageInstallation → ExecuteCommand (platform-conditional) × 2 → ApiServer
