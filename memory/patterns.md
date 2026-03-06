@@ -1012,3 +1012,24 @@ Warmup scenarios set `WarmUp: true` to suppress performance metrics for pre-popu
 
 ### 105. ApiServer Dependency for Client-Server
 Client-server workloads ALWAYS need `ApiServer` in Dependencies for cross-machine coordination. Enables heartbeat polling, state synchronization, and IP/port discovery between client and server VMs.
+
+## Patterns 106-111: Redis/Memcached Comparison & Review Calibration (Session 5)
+
+### 106. TLS Cross-Cutting Propagation
+When TLS is a dimension, IsTLSEnabled must appear on EVERY component: server executor, ALL client executors (including warmups), the compile step, and TLS resources dependency. Missing on one component = silent plaintext fallback.
+
+### 107. Key Space Sizing Reflects Server Memory Model
+Redis key-maximum values are smaller than Memcached for same data sizes because Redis has higher per-key overhead (encoding metadata, expiry pointers). Key space must fit in memory — exceeding causes eviction/OOM.
+
+### 108. WgetPackageInstallation vs GitRepoClone
+- WgetPackageInstallation: release tarballs (pinned version, specific URL) — Redis server uses this
+- GitRepoClone: HEAD/branch builds (version pinned via git checkout in ExecuteCommand) — memtier uses this
+
+### 109. Bryan Reviews Mechanical Before Semantic
+For naming issues, Bryan checks file-name-matches-class-name BEFORE semantic naming concerns. Start with the most basic checks first. (From PR #641: file was CreateResourceFile.cs but class was CreateResponseFile.)
+
+### 110. Cross-Cutting Changes Require Completeness Evidence
+Bryan demands explicit evidence that ALL affected files were found. PR description must state: "Searched all profiles for X; only these N profiles match." Missing even one profile = PR blocked.
+
+### 111. Fault Tolerance Over Precision (Yang's Principle)
+When a dependency lookup can fail (env var missing, tool not in PATH), provide a sensible default rather than throwing. Yang on PR #458: "assume compiler version is 10 (use gcc>10 workaround)" — pragmatic resilience over precise detection.
