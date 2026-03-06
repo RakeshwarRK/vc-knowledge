@@ -1203,3 +1203,15 @@ Parameter names: `CommandLine` (most executors) vs `CommandArguments` (OpenSSL, 
 5. **GPU**: FormatDisks → GitRepoClone → NvidiaCudaInstallation → DockerInstallation → NvidiaContainerToolkitInstallation
 6. **Compilation workload**: ChocolateyInstallation → ChocolateyPackageInstallation (Cygwin) → CompilerInstallation → DependencyPackageInstallation (SPEC CPU)
 7. **Network**: DependencyPackageInstallation × 2 (config + tools) → LinuxPackageInstallation → ExecuteCommand (platform-conditional) × 2 → ApiServer
+
+### 161. Distro-Specific Package Names in LinuxPackageInstallation
+Use `Packages-Apt`/`Packages-Yum`/`Packages-Dnf` when package names differ across distros: `libtirpc-dev` (Debian/Ubuntu) vs `libtirpc-devel` (RHEL/Fedora). Only use generic `Packages` when the name is identical everywhere (e.g., `make`, `gcc`, `automake`).
+
+### 162. Hardware-Adaptive Parameters with Calculate
+LMBench: `"MemorySizeMB": "{calculate({SystemMemoryMegabytes} / 4)}"` — test 25% of RAM. This is the same pattern as Redis/Memcached memory sizing and MySQL/PostgreSQL buffer pool sizing. Always use calculate for memory-proportional configs so profiles adapt to any VM size.
+
+### 163. RecommendedMinimumExecutionTime Can Be Per-Configuration
+LMBench uses `"(4-cores)=04:00:00,(16-cores)=10:00:00,(64-cores)=16:00:00"` — a human-readable per-configuration guideline, not a single value. This format communicates that execution time scales with hardware.
+
+### 164. Executor Type Name Casing Must Match Exactly
+`LMbenchExecutor` (lowercase 'b'), not `LMBenchExecutor`. Type names in profiles must match the C# class name exactly. When in doubt, check the source code for the exact casing.
