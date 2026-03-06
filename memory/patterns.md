@@ -975,3 +975,16 @@ Yang reviews new workloads for: MIT headers on all .cs files, .vcpkg file in sou
 ### 98. Nullable vs Default Parameters
 Use GetValue<T>(name, default) for parameters where absence means "use this default."
 Use TryGetValue + nullable for parameters where absence has DIFFERENT meaning than any value (e.g., RecordCount null = "auto-calculate based on memory" vs RecordCount=1000 = "exactly 1000").
+
+## Patterns 99-100: Execution Flow & Profile Contract
+
+### 99. Profile Action Error Handling Flow
+ProfileExecutor runs actions in a loop until timeout. Error handling per iteration:
+- ErrorReason ≥ 500 → terminal, throws immediately (ProfileNotFound, PlatformNotSupported, DependencyNotFound)
+- ErrorReason 400-499 → serious but retryable, swallowed and retried next iteration (InvalidResults, ApiStatePollingTimeout)
+- ErrorReason < 400 → transient, swallowed (WorkloadFailed, MonitorErrors)
+- FailFast=true overrides all — any error throws immediately
+Dependencies run sequential/one-time. Actions loop forever. Monitors run parallel background.
+
+### 100. JSONPath Parameter Flow Is Non-Negotiable
+Every tunable value in a profile MUST be a top-level `$.Parameters.*` entry with JSONPath references (`$.Parameters.Duration`) in component Parameters. This is the profile contract — users customize behavior only through top-level Parameters. Hardcoding values in component Parameters that users might want to change violates this contract. Bryan blocks PRs that bypass this.
