@@ -396,3 +396,49 @@ else if (!string.IsNullOrWhiteSpace(this.PackageName))
 else
     // Resolve relative to VC root                   // Fallback
 ```
+
+## 29. Root vs User Mount Paths (PR #565)
+Distinguish mount point location based on who is running:
+```csharp
+if (string.Equals(user, "root"))
+{
+    // /mnt_dev_sdc1
+    mountPointPath = "/";
+}
+else
+{
+    // /home/user/mnt_dev_sdc1
+    mountPointPath = $"/home/{user}";
+}
+```
+
+## 30. CancellationToken.None for Must-Complete Operations (PR #565)
+Once a mount or permission change starts, it must finish — don't pass a cancellable token:
+```csharp
+await this.diskManager.CreateMountPointAsync(volume, newMountPoint, CancellationToken.None);
+await this.systemManager.SetFullPermissionsAsync(newMountPoint, ..., CancellationToken.None, ...);
+```
+
+## 31. Extension Methods for Cross-Cutting OS Operations (PR #565)
+chmod/chown logic as a reusable extension, not inline in one component:
+```csharp
+public static async Task SetFullPermissionsAsync(
+    this ISystemManagement systemManagement, string directoryPath, PlatformID platform,
+    EventContext telemetryContext, CancellationToken cancellationToken, string owner = null, ILogger logger = null)
+```
+
+## 32. Keep Packages Read-Only (PR #565)
+Write results to temp directory, not the package directory:
+```csharp
+// BEFORE: this.Combine(this.Prime95Package.Path, "results.txt")
+// AFTER:  this.Combine(this.GetTempPath(), FileContext.GetFileName("results.txt", DateTime.UtcNow))
+```
+
+## 33. Delete Dead Code Without Ceremony (PR #565)
+Remove unused constants, dictionaries, arrays with no backward-compat shims:
+```csharp
+// 18 unused string constants in UnixDiskManager — deleted
+// Static SystemDefinedMountPoints dictionary — deleted
+// SysbenchExecutor.SelectWorkloads array — deleted
+// No re-exports, no "// removed" comments, no deprecation period
+```
