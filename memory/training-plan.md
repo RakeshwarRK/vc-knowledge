@@ -8,8 +8,8 @@
 
 ## Progress Summary
 - **Total PRs in repo**: 536 merged
-- **PRs studied (deep + rapid + review-mined)**: ~120
-- **Patterns extracted**: 72 + Bryan's review meta-patterns
+- **PRs studied (deep + rapid + review-mined)**: ~130
+- **Patterns extracted**: 79 + Bryan's review meta-patterns
 - **Sessions**: 3 (initial 11 PRs + sweep phase 1-2 + sweep phase 2-3)
 - **Last updated**: 2026-03-06
 
@@ -201,15 +201,15 @@ PRs #1-16, #19-21, #27, #30, #39, #59, #92, #95, #104, #118, #139, #141, #149, #
 ### Smaller Contributors (mined for Bryan/Yang reviews)
 | Author | PRs | Bryan/Yang comments found |
 |--------|-----|---------------------------|
-| psingla1210 | 14 | (scanned) |
-| LiYueqian-James | 8 | (scanned) |
-| v-safilho | 6 | (scanned) |
-| nchapagain001 | 6 | (scanned) |
-| kayvontadj | 6 | (scanned) |
-| cjhillbrand | 6 | (scanned) |
-| muskankhedia | 4 | (scanned) |
-| dheeparaj | 4 | (scanned) |
-| bhagyeshpatil | 4 | (scanned) |
+| psingla1210 | 14 | 9 with comments — 73 (remove Azure-isms), 74 (parse by column name) |
+| LiYueqian-James | 8 | 5 with comments — 75 (rename after parsing), 76 (linear execution) |
+| v-safilho | 6 | 2 with comments — Bryan: simplify assertions, remove flaky tests |
+| nchapagain001 | 6 | 2 with comments — Bryan: infer behavior from single param |
+| kayvontadj | 6 | 2 with comments — docs, remove unused code |
+| cjhillbrand | 6 | 3 with comments — distinct test cases |
+| muskankhedia | 4 | 2 with comments — 78 (workload constants in workload class) |
+| dheeparaj | 4 | 2 with comments — version in package install, Async naming |
+| bhagyeshpatil | 4 | 2 with comments — don't use regex when split works |
 
 ## Phase 4: Future Training (after PR sweep)
 
