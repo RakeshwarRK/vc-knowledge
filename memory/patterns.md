@@ -655,3 +655,196 @@ Always use `--group_reporting` when FIO runs multiple jobs:
 7. **ConfigureAwait(false) is dead** — .NET removed the need; delete it everywhere
 8. **State for idempotency** — Track installations/changes to enable clean resets
 9. **Consistency is non-negotiable** — Usings inside namespace, license headers, tab alignment
+
+## 53. Declarative Platform Attributes (Yang, PR #360)
+Replace imperative platform checks with `[SupportedPlatforms]` attribute:
+```csharp
+// OLD (removed 876 lines of boilerplate):
+if (this.Platform != PlatformID.Unix) { return; }
+
+// NEW: attribute on class, framework enforces
+[SupportedPlatforms("linux-x64,linux-arm64")]
+public class MyExecutor : VirtualClientComponent
+
+// Test: Assert.IsFalse(VirtualClientComponent.IsSupported(executor));
+// Uses .NET RIDs as canonical platform identity
+```
+
+## 54. Centralized Version Management in Module.props (Bryan review, PR #408)
+ALL NuGet package versions must live in `Module.props`, never scattered in `.csproj` files:
+```xml
+<!-- Module.props — single source of truth -->
+<PackageVersion Include="Newtonsoft.Json" Version="13.0.3" />
+<!-- Bryan: "Versions in Module.props to be consistent with our conventions" -->
+```
+Use `FrameworkReference` for ASP.NET instead of individual NuGet packages.
+
+## 55. Safe CLI Defaults for v2 (Yang, PRs #498/#500)
+Simplest invocation is `--profile=X.json`. Defaults:
+- `--iterations=1` (run once, not forever)
+- `--packages` defaults to public blob store
+- No implicit `MONITORS-DEFAULT.json` merge
+- `--timeout=never` or `--timeout=-1` for infinite (not `--iterations=-1`)
+```
+// Principle: safe defaults for new users, opt-in for risky behavior
+// Principle: keep options semantically clean (iterations=count, timeout=duration)
+```
+
+## 56. Command-Line-Aware Parsing (Yang, PR #410)
+Parser inspects the original command line to avoid emitting zero-valued metrics:
+```csharp
+// DiskSpd: -w100 means write-only → skip read parsing entirely
+public enum ReadWriteMode { ReadWrite, ReadOnly, WriteOnly }
+// Eliminates polluted telemetry (all-zero read metrics during write-only test)
+// Also: enum over two booleans — makes state space explicit
+```
+
+## 57. Delay-Before-Process in File Monitors (Yang, PR #406)
+File-watching monitors must delay BEFORE processing, not after:
+```csharp
+// WRONG: process immediately, then delay → race with file writers
+// RIGHT: delay first, then process → files have time to finish writing
+await Task.Delay(this.ProcessingIntervalWaitTime, cancellationToken);
+await this.ProcessFileUploadsAsync(...);
+```
+
+## 58. Never Poll HasExited — Use WaitForExitAsync (Yang, PR #50)
+.NET `Process.HasExited` becomes true BEFORE output buffers flush:
+```csharp
+// WRONG: while (!process.HasExited) { await Task.Delay(10); } — loses trailing output
+// RIGHT: await process.WaitForExitAsync(cancellationToken);
+// ALSO: subscribe OutputDataReceived BEFORE Process.Start(), not after
+```
+
+## 59. FileMode.Create Not OpenOrCreate for Downloads (Yang, PR #226)
+Interrupted downloads + retry with smaller file leaves stale trailing bytes:
+```csharp
+// WRONG: new FileStream(path, FileMode.OpenOrCreate) — old bytes remain at end
+// RIGHT: new FileStream(path, FileMode.Create) — truncates before writing
+// ALSO: isolate downloaded profiles in "downloaded/" subdirectory
+```
+
+## 60. Override Destructive Defaults in Raw-Resource Subclasses (Yang+Bryan, PR #48)
+Base class cleanup can destroy raw disks/mount points:
+```csharp
+// FioExecutor base: DeleteTestFilesOnFinish = true (fine for file-based)
+// FioDiscoveryExecutor (raw disk): MUST set DeleteTestFilesOnFinish = false in constructor
+// Bryan: "Put this definition in the constructor for Discovery and Multi-Throughput as well"
+// ALSO: guard ProcessorCount / 2 against zero on single-CPU VMs
+```
+
+## 61. Every Catch Block in a Polling Loop Must Include Delay (Yang, PR #66)
+Without delay, failures cause tight spin loops:
+```csharp
+while (!cancellationToken.IsCancellationRequested)
+{
+    try { /* poll operation */ }
+    catch (Exception exc)
+    {
+        this.Logger.LogError(exc);
+        // CRITICAL: delay even on error, or the loop spins at 100% CPU
+        await Task.Delay(this.MonitorFrequency, cancellationToken);
+    }
+}
+```
+
+## 62. Never Remove CLI Aliases Without Deprecation (Yang, PR #313)
+Even typo'd flags become contracts once shipped:
+```csharp
+// "--eventbHubConnectionString" has a typo, but users depend on it
+// Must keep as alias alongside corrected "--eventHubConnectionString"
+// Breaking CLI contracts silently = production incident
+```
+
+## 63. No Logic in Property Getters/Setters (Bryan review, PR #271)
+Move calculations to `InitializeAsync()`:
+```csharp
+// WRONG: public int TableCount => this.SystemManager.GetMemoryKB() / 1024;
+// RIGHT: calculated in InitializeAsync, stored in field
+// For shared logic across components: static helpers on config class
+public static int GetTableCount(ISystemManagement sys, string scenario) { ... }
+```
+
+## 64. Lock Down Profile Parameters to Intended Use (Bryan review, PR #303)
+Purpose-built profiles should not expose parameters that let users deviate:
+```csharp
+// WRONG: Global param "Benchmark" on a TPCC-only profile — users might override to OLTP
+// RIGHT: Remove from globals; users who need different configs create their own profiles
+// ALSO: throw on unsupported input, don't silently fall through
+else { throw new DependencyException(..., ErrorReason.NotSupported); }
+```
+
+## 65. MetricScenario as Override Pattern (Bryan review, PR #246)
+Separate metric naming from execution scenario:
+```csharp
+scenarioName: this.MetricScenario ?? this.Scenario
+// Profile can define both Scenario (execution) and MetricScenario (telemetry naming)
+// Enables different metric labels without changing execution behavior
+```
+
+## 66. Scenario Names Enable --scenarios Filter (Bryan review, PR #562)
+Scenario names are functional, not decorative:
+```bash
+# Users can selectively run: --scenarios=RandomRead_4k_BlockSize,RandomRead_8k_BlockSize
+# WRONG: collapsing multiple discovery steps into one breaks this capability
+# Bryan: "Fix bugs in code, don't restructure profiles to work around them"
+```
+
+## 67. Documentation Describes Intent Not Implementation (Bryan review, PR #300)
+```
+// WRONG: "This profile exposes the FioExecutor class with template file support"
+// RIGHT: "This profile runs an OLTP database I/O workflow"
+// ALSO: don't use class names in profile docs (they become stale)
+// Supply concrete examples: "weight ratios for random read + write: 70/30"
+```
+
+## 68. Parameter Isolation Across Components (Yang review, PR #133)
+Never merge global parameters into child components unconditionally:
+```csharp
+// WRONG: child.Parameters = MergeWith(globalParams) — Workload A's "Command" overrides B
+// RIGHT: each component's parameter dictionary is independent
+// Caller decides conflict resolution, not the framework
+```
+
+## 69. Don't Create New Types When Existing Types Suffice (Yang review, PR #536)
+```csharp
+// WRONG: new JsonMetric class for parsing script output
+// RIGHT: use the canonical Metric class + JsonConvert
+// Yang: "Standardize serialization on the same object"
+// Parallel types for same concept = maintenance burden
+```
+
+## 70. Parameter Cohesion in Profiles (Bryan review, PR #491)
+Logically coupled parameters must share required/optional status:
+```json
+// WRONG: "PerformanceLibrary" optional + "PerformanceLibraryVersion" required
+// RIGHT: both required or both optional — asymmetric optionality confuses users
+```
+
+## 71. API Design Through Method Overloads (Bryan review, PR #647)
+Prefer clean overloads over different method names:
+```csharp
+// RIGHT:
+AssertCommandsExecuted(params string[] expectedCommands);
+AssertCommandsExecuted(bool exactOrder, params string[] expectedCommands);
+// ALSO: parameter name hides implementation ("expectedCommands" not "expectedCommandPatterns")
+```
+
+## 72. Canonical Workload File Structure (Yang, PRs #36/#64)
+Every new workload follows this structure:
+```
+src/.../VirtualClient.Actions/<Workload>/
+    <Workload>Executor.cs
+    <Workload>MetricsParser.cs
+VirtualClient.Actions.UnitTests/<Workload>/
+    <Workload>ExecutorTests.cs
+    <Workload>MetricsParserTests.cs
+VirtualClient.Actions.UnitTests/Examples/<Workload>/
+    <ExampleOutput>.txt          # Real sample output
+VirtualClient.Actions.FunctionalTests/
+    <Workload>ProfileTests.cs
+VirtualClient.Main/profiles/
+    PERF-<CATEGORY>-<WORKLOAD>.json
+website/docs/workloads/<workload>/
+    <workload>.md, <workload>-profiles.md, <workload>-metrics.md
+```
