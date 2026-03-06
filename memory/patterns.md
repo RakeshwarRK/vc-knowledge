@@ -902,3 +902,37 @@ Use declarative profile dependencies for OS packages:
 // RIGHT: LinuxPackageInstallation dependency in profile JSON with apt/dnf sections
 // Keeps executor OS-agnostic; profile declares requirements
 ```
+
+
+
+## Patterns 81-88: Session 4 Drill Discoveries
+
+### 81. DataTable Parser Pattern
+For key:value or tabular output, use `DataTableExtensions.ConvertToDataTable()` + `DataTable.GetMetrics()` rather than individual regex extractions. Filter lines in `Preprocess()` to only delimiter-matching lines, then parse as table. Post-hoc patch units and relativity on individual metrics.
+
+### 82. Preserve Tool Metric Names
+Don't rename metrics — use the exact names from the tool's output (e.g., "Iterations/Sec" not "CoreMark Score"). VC convention preserves the tool's original naming for traceability.
+
+### 83. Metric Verbosity Assignment
+Primary performance metrics get `Verbosity = 1`, secondary/config metrics get `Verbosity = 5`. This controls which metrics appear at different logging levels. Never omit verbosity.
+
+### 84. Conservative Metric Relativity
+Only set `HigherIsBetter`/`LowerIsBetter` for true performance metrics. Configuration values (iterations count, thread count) get `MetricRelativity.Undefined`. Don't over-specify.
+
+### 85. Scenario Names Are Metric-Focused
+Scenario names describe WHAT is measured, never the action verb. Use "Gflops" not "ExecuteHpcg", "SHA256" not "RunOpenSSL". For IO: "RandomWrite_4k_BlockSize". For compression: "7zLZMAUltraMode".
+
+### 86. Installation Archetypes
+Six patterns for workload installation:
+1. Download & run: DependencyPackageInstallation (Geekbench, OpenSSL)
+2. Build from source: CompilerInstallation + GitRepoClone (CoreMark, HPCG)
+3. Windows cross-platform: Chocolatey + Compiler (Lapack)
+4. Client-server: DependencyPackage + ApiServer (Redis, Memcached)
+5. IO workload: FormatDisks + MountDisks + DependencyPackage (FIO)
+6. GPU/Container: FormatDisks + Docker + NvidiaCuda (MLPerf)
+
+### 87. MinimumExecutionInterval Is a Gap Timer
+MinimumExecutionInterval (profile-level) is the minimum gap between re-executions, NOT the benchmark duration. Usually small (00:01:00). Don't confuse with Duration (component-level, controls how long to run).
+
+### 88. Unit Test Coverage Pattern
+VC tests always cover 4 areas: happy path execution, CancellationToken respect, error propagation (wraps in WorkloadException), and unsupported component skipping (IsSupported=false). Uses delegate-based TestComponent inner classes, not mocking frameworks.
