@@ -936,3 +936,42 @@ MinimumExecutionInterval (profile-level) is the minimum gap between re-execution
 
 ### 88. Unit Test Coverage Pattern
 VC tests always cover 4 areas: happy path execution, CancellationToken respect, error propagation (wraps in WorkloadException), and unsupported component skipping (IsSupported=false). Uses delegate-based TestComponent inner classes, not mocking frameworks.
+
+## Patterns 89-98: Session 4b Deep Drills
+
+### 89. Parser Strategy Matches Output Format
+- Tabular text (key:value) → DataTable + GetMetrics (CoreMark, LMbench)
+- XML output → XmlSerializer + POCO classes (NTttcp)
+- JSON output → JsonConvert.DeserializeObject (FIO)
+- Don't force one parsing pattern on all tools.
+
+### 90. Client-Server Profile: CommandLine vs Typed Parameters
+Client-server executors (Redis, Memtier, NTttcp) use raw CommandLine strings, not decomposed typed parameters. The executor appends server IP/port but benchmark flags are a single string. Simpler workloads (CoreMark, Geekbench) may use typed parameters.
+
+### 91. Redis Benchmark Key Space Design
+Warmup scenarios pre-populate distinct key pools (--key-prefix sm/med/lg) with --ratio 1:0 (write-only) and --requests=allkeys. Benchmark scenarios then use --ratio 1:1 (50/50 R/W) with --key-pattern R:R (random access). Each data size needs its own warmup.
+
+### 92. IO Profile Triple Dependency
+IO workloads always need: (1) LinuxPackageInstallation for the tool, (2) FormatDisks, (3) MountDisks with DiskFilter. Windows uses DependencyPackageInstallation scoped with SupportedPlatforms: "win-x64". Don't include FormatDisks/MountDisks for in-memory stores (Redis).
+
+### 93. FIO Data Integrity Scenarios
+IO profiles include DataIntegrity scenarios alongside performance scenarios: --verify=sha256 --do_verify=1, smaller file size (4G vs 496G), --numjobs=1 --iodepth=1, subset of block sizes, no --runtime (run to completion).
+
+### 94. Source Compilation Pattern
+Some workloads compile from source: LinuxPackageInstallation (build deps) → GitRepoClone/WgetPackageInstallation (source) → ExecuteCommand (make/configure). Redis, CoreMark, HPCG use this. Blob download is for pre-built binaries only.
+
+### 95. ServerInstances Scaling
+Redis/Memcached use ServerInstances={LogicalCoreCount} because they're single-threaded per process. One instance per core saturates the server. This is domain knowledge that affects profile design.
+
+### 96. Yang's Operational Review Checklist
+Yang reviews new workloads for: MIT headers on all .cs files, .vcpkg file in source, blob store upload, sensitive data redaction in test files, platform-specific line ending parsing, complete metric extraction, example arguments in comments.
+
+### 97. Abstraction Level Decision Rule
+"Where does this concern naturally live?" determines abstraction level:
+- ProcessorAffinity → process creation layer (cross-cutting, goes in Core)
+- CoolDownPeriod → individual executor logic (workload-specific, stays per-component)
+- Don't ask "how many consumers?" — ask "where does this naturally belong?"
+
+### 98. Nullable vs Default Parameters
+Use GetValue<T>(name, default) for parameters where absence means "use this default."
+Use TryGetValue + nullable for parameters where absence has DIFFERENT meaning than any value (e.g., RecordCount null = "auto-calculate based on memory" vs RecordCount=1000 = "exactly 1000").
