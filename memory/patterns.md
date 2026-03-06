@@ -1149,3 +1149,18 @@ OpenSSL's `-multi` flag is NOT in the profile — executor adds it internally. P
 
 ### 148. Minimal Scenario Naming for CPU Workloads
 CPU workload scenarios use just the variant name: `MD5`, `SHA256`, `RSA2048` — not `OpenSSL_Speed_MD5`. Tool name is implicit from executor type; benchmark mode (speed) is the only mode. Only add prefixes when disambiguation is needed (multiple tools in one profile, or multiple modes).
+
+### 149. GitRepoClone Dependency Type
+`GitRepoClone` clones a git repo as a dependency. Params: `RepoUri` (GitHub URL), `PackageName` (output name). Use for live repos (CoreMark). Use `WgetPackageInstallation` for tagged release tarballs. Use `DependencyPackageInstallation` for pre-built packages from blob storage.
+
+### 150. CompilerInstallation Dependency Type
+Dedicated dependency for build compiler. Params: `CompilerVersion` (empty = system default), `CygwinPackages` (Windows build via Cygwin: "gcc-g++,gcc,perl"). Handles both Linux (apt/dnf) and Windows (Cygwin) transparently.
+
+### 151. ThreadCount=null for Auto-Detection
+`"ThreadCount": null` means "executor decides." Different from `{calculate({LogicalCoreCount})}` which forces a value. null = trust executor's default algorithm. The executor typically uses logical core count internally.
+
+### 152. MinimumExecutionInterval vs RecommendedMinimumExecutionTime
+`MinimumExecutionInterval` (top-level, enforced): prevents re-execution faster than interval. `RecommendedMinimumExecutionTime` (Metadata, advisory): tells users how long to run. Independent settings — one enforces, one advises.
+
+### 153. Don't Over-Apply Cross-Cutting Patterns
+MetricScenario and Tags exist in OpenSSL but NOT CoreMark. Not all profiles use the same cross-cutting params. Always check executor source or similar profiles before assuming a pattern is universal. False positives (adding unnecessary params) are as wrong as false negatives (missing required params).
