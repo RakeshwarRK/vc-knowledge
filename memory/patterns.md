@@ -1134,3 +1134,18 @@ SockPerf varies TCP/UDP (not message size) because latency is protocol-sensitive
 
 ### 143. ApiServer Role Restriction
 `"Roles": "Server"` on ApiServer means it only starts on Server VM. Client-server sync requires API on server side only in some profiles. This is distinct from profiles that start ApiServer on both roles.
+
+### 144. MetricScenario for Metric Output Normalization
+Profiles use `MetricScenario` (lowercase) alongside `Scenario` (PascalCase/display) to normalize metric names. Example: Scenario="AES-128-CBC", MetricScenario="aes-128-cbc". Ensures consistent metric keys regardless of scenario display name casing.
+
+### 145. Tags for Metric Categorization
+Scenarios can have `"Tags": "CPU,OpenSSL,Cryptography"` — comma-separated categories for filtering/grouping metrics in telemetry. Tags are typically workload-level consistent (same across all scenarios in a profile).
+
+### 146. TimeSpan Decomposition in Commands
+`{Duration.TotalSeconds}` decomposes a TimeSpan parameter into numeric seconds for CLI arguments. Available: `.TotalDays`, `.TotalHours`, `.TotalMinutes`, `.TotalSeconds`, `.TotalMilliseconds`. Keeps source of truth as TimeSpan while giving CLI the number it needs.
+
+### 147. Executor-Managed Threading
+OpenSSL's `-multi` flag is NOT in the profile — executor adds it internally. Profile specifies WHAT to benchmark; executor handles HOW (including parallelism). Keeps profiles portable across VM sizes. Compare to FIO where ThreadCount IS in the profile because it's a tuning dimension.
+
+### 148. Minimal Scenario Naming for CPU Workloads
+CPU workload scenarios use just the variant name: `MD5`, `SHA256`, `RSA2048` — not `OpenSSL_Speed_MD5`. Tool name is implicit from executor type; benchmark mode (speed) is the only mode. Only add prefixes when disambiguation is needed (multiple tools in one profile, or multiple modes).
