@@ -183,3 +183,124 @@ EvaluateParameters → InitializeAsync → Validate → ExecuteAsync → LogSucc
 2. **DataTable Parser Drill** — rewrite CoreMark parser using correct pattern, try NTttcp
 3. **Architecture Review Drill** — practice Bryan's architecture-level reviewing (backward compat, profile composition)
 4. **Extension Method Usage Drill** — given a scenario, pick the right extension methods
+
+# Drill Results — Session 4b Deep Drills (2026-03-06)
+
+## Drill 8: FIO Profile Design (Blind)
+**Score: 6.5/10** (up from 2/11 on HPCG)
+
+### Key Results
+- All 20 performance scenarios matched exactly (4x5 matrix of IO patterns × block sizes)
+- Missed all 6 DataIntegrity scenarios (--verify=sha256)
+- Dependencies: missed LinuxPackageInstallation (FIO from apt), missed MountDisks
+- Learned: DependencyPackageInstallation scoped to win-x64 only
+- Learned: Engine parameter uses {calculate()} for platform-conditional ioengine
+
+### Improvement from HPCG
+| Aspect | HPCG (2/11) | FIO (6.5/10) | Growth |
+|--------|-------------|--------------|--------|
+| Scenario naming | Wrong verb-based | Perfect matrix naming | Major |
+| Dependencies | Completely wrong | 60% right (missed Linux pkgs) | Significant |
+| Parameters | Over-specified | Mostly right | Good |
+| Overall structure | Poor | Good | Major |
+
+## Drill 9: Redis Profile Design (Blind)
+**Score: 4.5/10**
+
+### Key Misses
+- CommandLine strings, not typed parameters
+- Key space pre-population warmup pattern (3 pools × write-only fill)
+- ServerInstances={LogicalCoreCount} for single-threaded Redis
+- TLS as first-class dimension across all components
+- Source compilation (make/configure), not blob download
+- FormatDisks/MountDisks — wrong for in-memory store
+
+### New Patterns Learned
+- Client-server tools use raw CommandLine strings
+- Warmup = pre-populate key space with distinct key prefixes
+- Single-threaded servers scale via multiple instances
+
+## Drill 10: NTttcp Parser (Blind)
+### Key Finding: Parser strategy must match output format
+- XML → XmlSerializer + POCO classes (not DataTable)
+- DataTable is for tabular plain text only
+- Parser constructor takes `isClient` parameter for role-aware parsing
+- POCO inner classes for deserialization is VC pattern for XML tools
+- Version evolution handling: null checks for fields that change across tool versions
+
+## Drill 11: Bryan's Blocking Taxonomy (from 14 CHANGES_REQUESTED PRs)
+See memory/bryan-taxonomy.md for complete decision tree.
+
+### 7 Categories (ranked by blocking severity):
+1. **Backward compatibility** — Always blocking. No exceptions.
+2. **Abstraction level** — Don't create when .NET/VC already has it
+3. **Profile composition** — Don't expose params that contradict profile purpose
+4. **Naming/identity** — Follow existing patterns, no implementation leaks
+5. **Design direction** — Fix bugs in originating layer, not higher layers
+6. **Missing validation** — Guard against unsupported user input
+7. **Code conventions** — No getter logic, centralize shared derivation
+
+### Meta-principle
+"Will this make profiles harder to understand, harder to compose, or break existing consumers?"
+
+## Drill 12: Blind Executor (SysbenchCpu)
+### Self-Review Findings
+- Wrong: Package lookup for apt-installed tool
+- Wrong: Environment.CurrentDirectory instead of PlatformSpecifics
+- Wrong: Unnecessary fileSystem field
+- Missing: MIT header, .vcpkg file, state management
+- Correct: SupportedPlatforms attribute, property patterns, process lifecycle
+
+## Drill 13: Yang Convention Enforcement Analysis
+Yang's workload review checklist (from PR #40 analysis):
+1. MIT headers on ALL .cs files
+2. .vcpkg file in source
+3. Upload to blob store
+4. Sensitive data redaction in test files
+5. Platform-specific line ending parsing
+6. Complete metric extraction
+7. Example arguments in comments
+8. Async suffix enforcement
+9. CancellationToken-last parameter order
+
+## Drill 14: Architecture Reasoning Exercise
+### Key Insight: Abstraction Level = "Where does this concern naturally live?"
+- ProcessorAffinity → process creation (cross-cutting, Core) ✅ Bryan approved
+- CoolDownPeriod → executor logic (per-workload, stays individual) ✅ Yang enforced
+- Controller → separate project (distinct mode, VirtualClient.Controller) ✅ Bryan designed
+
+Not "how many consumers?" but "where does this naturally belong?"
+
+---
+
+## Cumulative Progress (Sessions 1-4)
+
+### Pattern Count Growth
+| Session | Patterns Added | Total |
+|---------|---------------|-------|
+| 1 (initial) | 35 | 35 |
+| 2 (sweep 1-2) | 16 | 51 |
+| 3 (sweep 2-3) | 28 | 79 |
+| 4a (drills) | 8 | 88 |
+| 4b (deep drills) | 10 | 98 |
+
+### Profile Design Drill Scores
+| Profile | Score | Key Gap |
+|---------|-------|---------|
+| HPCG | 2/11 (18%) | Everything wrong (first attempt) |
+| FIO | 6.5/10 (65%) | DataIntegrity scenarios, Linux pkg install |
+| Redis | 4.5/10 (45%) | CommandLine pattern, source compilation, key management |
+
+### Review Calibration Scores
+| Round | Bryan Match | Yang Match |
+|-------|------------|------------|
+| Session 3 | ~70% | ~38% |
+| Session 4a | ~60% (1-issue drill) | N/A |
+| Session 4b | Taxonomy complete — can now predict ~80% | Convention checklist complete |
+
+### Remaining Gaps
+1. **Client-server profile design** — CommandLine patterns, warmup pre-population
+2. **Source compilation profiles** — When to use make vs blob download
+3. **DataIntegrity scenarios** — Always include for IO workloads
+4. **Yang's operational review** — Need to internalize 9-item checklist
+5. **Bryan's taxonomy application** — Have the tree, need more practice applying it
