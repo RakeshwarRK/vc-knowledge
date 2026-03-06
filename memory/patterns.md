@@ -988,3 +988,27 @@ Dependencies run sequential/one-time. Actions loop forever. Monitors run paralle
 
 ### 100. JSONPath Parameter Flow Is Non-Negotiable
 Every tunable value in a profile MUST be a top-level `$.Parameters.*` entry with JSONPath references (`$.Parameters.Duration`) in component Parameters. This is the profile contract — users customize behavior only through top-level Parameters. Hardcoding values in component Parameters that users might want to change violates this contract. Bryan blocks PRs that bypass this.
+
+## Patterns 101-105: Memcached Deep Drill (Session 5)
+
+### 101. Multi-threaded vs Single-threaded Server Scaling
+- Redis: single-threaded → ServerInstances={LogicalCoreCount} (many processes)
+- Memcached: multi-threaded (-t N) → ONE process, no ServerInstances needed
+- Don't blindly copy scaling patterns between workloads — understand the server's threading model first.
+
+### 102. CommandLine Placeholder Syntax (Two Systems)
+Two distinct substitution systems in profiles:
+- `$.Parameters.X` — JSONPath reference for parameter VALUES (in component Parameters block)
+- `{X}` — ApplyParameters string substitution (WITHIN CommandLine strings)
+- CommandLine uses `{Duration}` and `{Port}`, NOT `$.Parameters.Duration`
+
+### 103. Scenario Naming Encodes Full Configuration
+For benchmark matrix scenarios: `tool_threads_clients_datasize_ratio`
+Example: `memtier_8t_16c_32b_r1:1` — encodes threads, clients, data size, and ratio.
+NOT just the data size ("Memtier_1kb_String" loses thread/client dimensions).
+
+### 104. WarmUp Flag Controls Metric Emission
+Warmup scenarios set `WarmUp: true` to suppress performance metrics for pre-population runs. Without it, warmup data pollutes real benchmark results. Warmup scenarios also use ClientInstances=1 (only need one writer to populate).
+
+### 105. ApiServer Dependency for Client-Server
+Client-server workloads ALWAYS need `ApiServer` in Dependencies for cross-machine coordination. Enables heartbeat polling, state synchronization, and IP/port discovery between client and server VMs.
