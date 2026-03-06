@@ -105,3 +105,25 @@ throw new WorkloadException(
     exc,
     ErrorReason.WorkloadResultsNotFound);
 ```
+
+## Status Code Registry (PR #595)
+
+Exit codes are mapped to broader status code categories for orchestration integration:
+
+| Base | Range | Category | Subcategory |
+|------|-------|----------|-------------|
+| 110000 | 110000-119999 | CodeError | VC bug (default for unmapped codes) |
+| 210000 | 210000-219999 | OrchestrationError | API failures, dependency issues, HTTP errors |
+| 211000 | 211000-211999 | ToolsetError | Workload/monitor failures (subset of Orchestration) |
+| 310000 | 310000-319999 | ConfigurationError | Platform/profile/license/extension issues |
+| 311000 | 311000-311999 | UsageError | User mistakes: missing stores, bad layouts (subset of Config) |
+| 410000 | 410000-419999 | SystemError | Disk, memory, perf counter, system operation failures |
+| 510000 | 510000-519999 | ThresholdOrKpiError | Quality gate failures |
+
+**Formula:** `StatusCode = StatusCodeBase + ExitCode`
+**Default:** Unmapped exit codes → `CodeError + 1` (110001) — treated as VC bug
+**Output:** Written to stderr on non-zero exit: `Status Code = {code}`
+**Enforcement:** Unit test iterates ALL ErrorReason values, asserts each has a non-default mapping
+
+### Design principle
+Every new ErrorReason enum value MUST have a StatusCodeRegistry mapping. CI enforces this via `StatusCodeRegistryHasStatusCodesMappedForAllErrorReasons` test.
