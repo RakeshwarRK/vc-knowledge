@@ -1063,3 +1063,41 @@ When tools write to file (not stdout), poll for file existence + non-empty conte
 
 ### 120. SetIfNotDefined vs GetValue Default
 `Parameters.SetIfNotDefined(name, value)` writes the default INTO the dictionary (visible to other readers). `GetValue<T>(name, default)` returns default without writing. Use SetIfNotDefined when the default must be forwarded to sub-executors or serialized.
+
+## Patterns 121-132: Domain Knowledge & Edge Cases (Session 5)
+
+### 121. The 512 Queue Depth Invariant
+FIO and DiskSpd both use `QueueDepth = 512 / ThreadCount` with `ThreadCount = LogicalCoreCount / 2`. Total outstanding I/O is ALWAYS 512 regardless of VM size. This makes IOPS results directly comparable across different VMs. Changing this formula breaks cross-VM comparability.
+
+### 122. FileSize Must Exceed RAM
+FIO FileSize=496G and DiskSpd -c496G must exceed the VM's maximum possible RAM. If the file fits in memory, the OS caches it and you benchmark RAM, not disk. The 496G leaves 4G headroom from the 500G DiskFill for filesystem metadata.
+
+### 123. DiskFill Forces SSD Steady-State
+Pre-filling the disk with DiskFillSize=500G forces the SSD controller into steady-state where garbage collection and wear-leveling are active. Without fill, SSDs report artificially high write speeds on empty NAND pages.
+
+### 124. Block Size Set Covers Real Workloads
+4k=filesystem pages, 8k=SQL Server pages, 12k=alignment stress test (non-power-of-2), 16k=InnoDB pages, 1024k=sequential streaming. FIO and DiskSpd use identical block sizes for cross-platform comparability.
+
+### 125. Redis Key Count Inversely Proportional to Key Size
+`10M×32B≈320MB`, `500K×1KB≈500MB`, `50K×10KB≈500MB`. Total memory footprint per pool is kept similar (300-500MB). Ensures working set exceeds L3 cache. Memcached uses larger key counts because its slab allocator has lower per-key overhead.
+
+### 126. Pipeline Depth Is Redis Queue Depth
+Warmup pipeline=32 (stable bulk loading), benchmark pipeline=100 (saturate command queue for peak throughput measurement). Pipeline depth determines how many commands are in-flight before waiting for responses.
+
+### 127. OpenSSL Algorithm Coverage
+The 13-algorithm set covers: hashes (MD5, SHA1/256/512), symmetric ciphers (DES-EDE3, AES-128/192/256-CBC, Camellia-128/192/256-CBC), and asymmetric (RSA2048/4096). AES tests hardware acceleration (AES-NI), Camellia serves as software-only control. RSA measures TLS handshake capacity.
+
+### 128. Process Exit Code Semantics
+137 = SIGKILL (128+9) — expected for killed servers. 130 = SIGINT (128+2) — expected for interrupted clients. -1 = SafeKill result. Always add workload-specific exit codes to success list with comments explaining WHY.
+
+### 129. Task.WhenAny vs WhenAll Decision
+Servers → WhenAny (detect first failure fast, restart all). Independent workloads (FIO per-disk) → WhenAll (each process is independent, partial success not meaningful).
+
+### 130. DiskFill State Persistence
+Save state AFTER disk fill completes; check state BEFORE starting fill. State key includes executor type name to avoid collisions. This prevents re-filling disks (30+ minutes) on every execution round.
+
+### 131. Two-Layer Retry for Client-Server
+Flow-level retry (3 retries) wraps the entire client workflow (connect, get state, run). Instance-level retry (3 retries) wraps individual process startups. ALWAYS exclude OperationCanceledException from retry — cancellation means "stop", not "try again".
+
+### 132. Delete Results Before Run, Not After
+Geekbench deletes results file BEFORE executing, not after. If the new run crashes, you get a clean "no results" error instead of silently parsing stale previous-run results.
