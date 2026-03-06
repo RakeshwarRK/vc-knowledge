@@ -26,6 +26,10 @@
 | Memcached v1 | 3.7/10 (23%) | JSONPath, warmup, scenarios |
 | DiskSpd | ~45/100 (45%) | Parser format (-Rtext not -Rxml) |
 | Memcached v2 | 5.5/10 (55%) | Threading model, scenario naming |
+| SockPerf (network) | 1.9/10 (19%) | Wrong architecture (combined suite, meta-orchestrator) |
+| CoreMark | 3.7/10 (37%) | Over-applied OpenSSL patterns, wrong dep types |
+| OpenSSL | 5.0/10 (50%) | Algorithm coverage perfect, missed Tags/MetricScenario/threading |
+| Prime95 | 6.9/10 (69%) | Naming rules + calculate expression perfect, best score yet |
 
 ### Domain Knowledge Coverage
 | Workload | WHY Understood | Key Insight |
@@ -60,6 +64,11 @@
 | 7 | Domain knowledge (6 workloads) | WHY for all params | 121-127 |
 | 8 | Edge case patterns (6 categories) | Process/retry/cleanup | 128-132 |
 | 9 | Calculate expression deep dive | Roslyn CSharpScript, 3-phase eval | 133-136 |
+| 10 | SockPerf network profile blind design | 1.9/10 — meta-orchestrator discovered | 137-143 |
+| 11 | OpenSSL profile blind design | 5.0/10 — algorithm coverage perfect | 144-148 |
+| 12 | CoreMark profile blind design | 3.7/10 — over-applied patterns | 149-153 |
+| 13 | Scenario naming synthesis (15 profiles) | 6 naming rules derived | 154 |
+| 14 | Prime95 profile blind design | **6.9/10** — best score yet | 155-156 |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -69,4 +78,5 @@
 | 3 (sweep 2-3) | 28 | 79 |
 | 4a (drills) | 8 | 88 |
 | 4b (deep drills) | 10 | 98 |
-| 5 (mastery drills) | 38 | **136** |
+| 5 (mastery drills) | 38 | 136 |
+| 5c (continued) | 20 | **156** |
