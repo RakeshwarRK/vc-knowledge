@@ -3,105 +3,107 @@
 ## Strategy
 - **Deep study**: Framework/architecture PRs (fetch code, blind attempt, compare, extract patterns)
 - **Rapid scan**: Workload onboarding PRs (check patterns, flag deviations, batch lessons)
+- **Review mining**: Extract Bryan/Yang review comments on other people's PRs
 - **Skip**: Docs-only, version bumps, dependabot, typo fixes, <10 line changes
 
-## Phase 1: Bryan (brdeyo) — Framework Authority [32 PRs, 11 done]
+## Progress Summary
+- **Total PRs in repo**: 536 merged
+- **PRs studied (deep + rapid + review-mined)**: ~35
+- **Patterns extracted**: 52 + Bryan's review meta-patterns
+- **Sessions**: 2 (initial 11 PRs + current sweep)
+- **Last updated**: 2026-03-06
 
-### Deep Study (framework-changing, >200 additions)
-| PR | +/- | Title | Status |
-|----|-----|-------|--------|
-| #158 | +5790/-1111 | Metadata contract standardization | TODO |
-| #563 | +7222/-876 | Log file telemetry upload (CSV/JSON/YAML schema) | TODO |
-| #486 | +1860/-2 | Windows Event Log + Linux System Log monitors | TODO |
-| #28 | +1250/-817 | FIO Discovery grouped job results | TODO |
-| #33 | +1915/-547 | Custom API ports + proxy scenario | TODO |
-| #41 | +1583/-725 | Proxy logger event handlers | TODO |
-| #120 | +16198/-1570 | File upload logs (large, co-authored) | TODO |
-| #579 | +656/-520 | .NET 8.0 multi-targeting | TODO |
-| #236 | +449/-58 | Logical processors per core fix | TODO |
-| #525 | +207/-37 | Experiment ID in summary logger | TODO |
-| #163 | +132/-23 | --fail-fast option | TODO |
-| #503 | +158/-9 | Extension propagation bug fix | TODO |
-| #54 | +216/-21 | MockFixture/InMemoryApiClient design flaws | TODO |
+## Phase 1: Bryan (brdeyo) — DONE for high-value PRs
 
-### Rapid Scan (bug fixes, small changes)
-| PR | +/- | Title | Status |
-|----|-----|-------|--------|
-| #618 | +223/-191 | Geekbench process kill logic | TODO |
-| #481 | +45/-12 | Serilog file rolling fix | TODO |
-| #483 | +71/-72 | Telemetry channel dispose | TODO |
-| #502 | +59/-31 | Bootstrap no-op params | TODO |
-| #564 | +68/-5 | Whitespace hotfix | TODO |
-| #631 | +26/-0 | Ensure core directories exist | TODO |
-| #29 | +148/-83 | DBNull handling in DataTable | TODO |
-| #26 | +312/-91 | --source CLI option | TODO |
-| #162 | +87/-528 | File upload descriptor cleanup | TODO |
+### Completed (deep study)
+| PR | Title | Patterns |
+|----|-------|----------|
+| #576 | Controller/Agent Architecture | 11-15 |
+| #595 | Status Code Registry | error-handling.md |
+| #606 | Kernel Race Condition Fix | error-handling.md |
+| #549 | FIO SingleProcessAggregated | 16-20 |
+| #494 | Script Subcommands | 21-23 |
+| #547 | SSH Client Refactor for SCP | 24-25 |
+| #627 | Path Handling & ScriptExecutor | 26-28 |
+| #565 | Disk Mount Permissions | 29-33 |
+| #158 | Metadata Contract | 34-35 |
+| #486 | Event Log Monitors | 36 |
+| #163 | --fail-fast option | 37 |
+| #503 | Extension propagation bug | 38 |
+| #28 | FIO grouped job results | 52 |
+| #33 | Custom API ports | 51 |
+| #236 | Logical processors fix | (scanned) |
 
-### Skip (docs, config, trivial)
-- #577 (docs move), #583 (test platform), #596 (message text), #614 (cert), #511 (nuget bump), #512 (package size), #198 (6-line log), #31 (typo), #32 (config), #53 (docs)
+### Completed (rapid scan / review mining)
+| PR | Title | Lessons |
+|----|-------|---------|
+| #618 | Geekbench kill -9 0 | 39 |
+| #631 | Core directories race | 40 |
+| #481 | Serilog rolling fix | (scanned) |
+| #54 | MockFixture design flaws | (scanned) |
+| #29 | DBNull handling | (scanned) |
 
-## Phase 2: Yang (yangpanMS) — Top Contributor [158 PRs]
+### Bryan review comments mined from other people's PRs
+| PR | Author | Comments | Key lessons |
+|----|--------|----------|-------------|
+| #55 | nmalkapuram | 15 comments | 43, 45, 49 — consolidate executors, naming, pin versions |
+| #65 | nmalkapuram | 12 comments | 44, 45, 46 — least privilege, naming, test precision |
+| #46 | nmalkapuram | 4 comments | 44, 45 — naming, least privilege |
+| #168 | deep1712 | 8 comments | 47, 48, 45 — state tracking, IsSupported, naming |
+| #562 | saibulusu | 4 comments | Scenario naming significance, Duration pattern |
+| #575 | saibulusu | 3 comments | Block size consistency, Duration in CLI |
+| #543 | imadityaa | 1 comment | Plural naming |
+| #544 | imadityaa | 1 comment | SequentialExecution naming |
 
-### Deep Study
-| PR | +/- | Title | Status |
-|----|-----|-------|--------|
-| #36 | +30546 | Commercial workloads (SPEC) | TODO |
-| #412 | +477 | Metric verbosity + console print | TODO |
-| #429 | +293 | Parallel loop execution | TODO |
-| #449 | +892 | --logger CLI customize | TODO |
-| #519 | +416 | Summary file logger formatting | TODO |
-| #309 | +1140 | Certificate + managed identity for packages/eventhub | TODO |
-| #318 | +1400 | ASP.NET server/client workload | TODO |
-| #190 | +457 | DiskSpd parser redesign | TODO |
-| #214 | +278 | .NET 8 migration | TODO |
-| #325 | +433 | Long file paths Windows | TODO |
+### Remaining (lower priority)
+- #120 (file upload, 16K lines — co-authored, may scan later)
+- #563 (log upload schema, 7K lines — dedicated session needed)
+- #579 (.NET 8 targeting — build config, low pattern value)
+- #41, #525, #162, #502, #564 (minor fixes)
 
-### Rapid Scan (workload onboarding pattern check)
-| PR | +/- | Title | Status |
-|----|-----|-------|--------|
-| #58 | +5055 | lspci monitor | TODO |
-| #64 | +4547 | CoreMark Pro | TODO |
-| #68 | +1934 | SPECcpu Windows | TODO |
-| #43 | +377 | nvidia-smi monitor | TODO |
-| #44 | +247 | CoreMark thread overwrite | TODO |
-| #110 | +464 | SuperBench H100 config | TODO |
-| #116 | +401 | CoreMark/Pro Windows | TODO |
-| #188 | +447 | RPM build | TODO |
-| #267 | +937 | UTF-8 BOM conversion | SKIP |
-| #269 | +850 | Fix unit test Linux | TODO |
-| #283 | +368 | Fix broken unit tests | TODO |
-| #298 | +688 | OneBranch pipeline | SKIP |
-| #388 | +338 | Version bump v1.16 | SKIP |
+## Phase 2: Yang (yangpanMS) — IN PROGRESS
 
-## Phase 3: Other Contributors [~245 PRs]
+### Completed
+| PR | Title | Patterns |
+|----|-------|----------|
+| #412 | Metric verbosity (original) | 42 |
+| #429 | ParallelLoopExecution | 41 |
+| #309 | Certificate + managed identity | 50 |
+| #449 | --logger CLI customize | (scanned) |
+| #519 | Summary logger formatting | (scanned) |
+| #190 | DiskSpd parser redesign | (scanned) |
+| #325 | Long file paths Windows | (scanned) |
+| #318 | ASP.NET server/client | (scanned) |
 
-### Prioritized
-| Author | PR Count | Focus |
-|--------|----------|-------|
-| ericavella | 35 | Workload patterns, review style |
-| saibulusu | 42 | Workload patterns |
-| nmalkapuram | 43 | Workload patterns |
-| imadityaa | 28 | Features |
-| deep1712 | 26 | Features |
-| RakeshwarK | 32 | Self-review for improvement |
+### TODO
+| PR | Title | Priority |
+|----|-------|----------|
+| #36 | Commercial workloads (SPEC, 30K lines) | HIGH — dedicated session |
+| #214 | .NET 8 migration | MEDIUM |
+| Remaining ~130 Yang PRs | Workload onboarding, config | Batch scan in next session |
 
-### Strategy for Phase 3
-- Batch by author, rapid-scan for pattern deviations
-- Deep study only if PR introduces new framework patterns
-- Focus on review comments from Bryan/Yang on other people's code
+## Phase 3: Other Contributors — TODO
 
-## Phase 4: Future Training Opportunities
+### Prioritized for Bryan review mining
+| Author | PR Count | Strategy |
+|--------|----------|----------|
+| ericavella | 35 | Mine Bryan/Yang review comments |
+| saibulusu | 42 | Mine Bryan/Yang review comments |
+| nmalkapuram | 43 | DONE (PRs #46, #55, #65 mined) |
+| imadityaa | 28 | Partially done (#543, #544) |
+| deep1712 | 26 | Partially done (#168) |
+| RakeshwarK | 32 | Self-review (done #636, #625) |
 
-### After PR Sweep
-1. **GitHub Issues analysis** — Study open issues for design intent and feature direction
-2. **Code review simulation** — Pick random PRs, write review before seeing actual reviews
-3. **Blind workload onboarding** — Pick a new tool (not in VC), design executor/parser/profile from scratch
-4. **Cross-repo comparison** — When CRC SDK repo is available, compare architectures
-5. **Breaking change analysis** — Track all breaking changes across versions, understand migration patterns
-6. **Performance optimization PRs** — Study any PRs focused on perf (caching, parallelism, memory)
-7. **Bryan's rejected PRs / closed-without-merge** — Understand what approaches were abandoned and why
+## Phase 4: Future Training (after PR sweep)
 
-## Progress Tracking
-- After each PR: update this file + push patterns to vc-knowledge
-- After each session: update training-summary.md with new capability assessment
-- Track: PRs studied, patterns extracted, session count
+### Immediate next opportunities
+1. **Bryan's rejected/closed-without-merge PRs** — What approaches were abandoned and why?
+2. **GitHub Issues** — Open issues reveal design intent and feature direction
+3. **Code review simulation** — Pick random new PRs, write review before seeing actual reviews
+4. **Blind workload onboarding** — Design executor/parser/profile for a tool not in VC
+
+### Longer-term
+5. **CRC SDK comparison** — When user is ready, create separate knowledge repo
+6. **Cross-cutting refactor practice** — E.g., migrate all parsers to new verbosity (real task)
+7. **Performance PRs** — Any PRs focused on caching, parallelism, memory optimization
+8. **Architecture decision records** — Document why VC chose X over Y for major decisions
