@@ -554,3 +554,104 @@ switch (verbosityFilter.ToLower())
 }
 ```
 Lesson: Yang built the foundation; #636 generalized it with int.TryParse and regex.
+
+## 43. One Executor Per Toolset, Parameterized by Mode (Bryan review, PR #55)
+Don't create separate executor classes per diagnostic type — use one executor with a mode parameter:
+```csharp
+// WRONG: DCGMIDiagDefaultExecutor, DCGMIDiagDiscoveryExecutor, DCGMIDiagFieldGroupExecutor
+// RIGHT: One DCGMIDiagExecutor with DiagnosticType parameter
+{ "Type": "DCGMIDiagExecutor", "Parameters": { "DiagnosticType": "Default" } }
+{ "Type": "DCGMIDiagExecutor", "Parameters": { "DiagnosticType": "Discovery" } }
+```
+Similarly consolidate parsers unless parsing logic is distinctively different.
+
+## 44. Principle of Least Privilege for Properties (Bryan review, PRs #46, #65)
+No public setters on parameters. Expose via "public new" in test subclass:
+```csharp
+// In production code: read-only parameter
+public string ClientScriptPath => this.Parameters.GetValue<string>(...);
+
+// In test helper: expose for testing without public setter
+public class TestExecutor : MyExecutor {
+    public new string ClientScriptPath => base.ClientScriptPath;
+}
+```
+
+## 45. Naming Conventions — Bryan's Rules (multiple PRs)
+- Profile naming: `PERF-SQL-POSTGRESQL.json` (not PERF-POSTGRESQL), `PERF-CPU-LINPACK.json` (not PERF-CPU-HPL)
+- Monitor naming: `MONITORS-GPU-NVIDIA.json` (category-hardware-vendor)
+- Parameter names: spell out (`ProblemSize` not `N`, `PartitionBlockingFactor` not `NB`)
+- Don't repeat class name in property: `Version` not `HPLVersion` in `HPLinpackExecutor`
+- Scenario naming: `InstallMSMPIPackage`, `Diagnostics` (consistent verbs)
+- Package naming: `msmpi.10.1.2.zip` (version separate from name)
+- Execution components: `SequentialExecution` not `LoopExecution` (match existing `ParallelExecution`)
+
+## 46. Precise Command Validation in Tests (Bryan review, PR #65)
+Remove from expected commands list sequentially, assert empty at end:
+```csharp
+// WRONG: Assert.IsTrue(executedCommands.Contains(expected))
+// RIGHT: Remove from expectedCommands[0] in OnCreateProcess, Assert.IsEmpty at end
+// This validates both the commands AND their exact order
+```
+
+## 47. State Tracking for System Changes (Bryan review, PR #168)
+Use state manager to track irreversible system changes (installations):
+```csharp
+// After installing: save state
+await this.StateManager.SaveStateAsync("MsmpiInstallation", new { Installed = true }, ct);
+// On next run: check state, skip if already done
+// Enables clean reset workflow
+```
+
+## 48. IsSupported for Platform No-Ops (Bryan review, PR #168)
+Windows-only dependencies should no-op on Linux via IsSupported:
+```csharp
+protected override bool IsSupported() => this.Platform == PlatformID.Win32NT;
+// Not: throw NotSupportedException in ExecuteAsync
+```
+
+## 49. Don't Expose Untested Versions as Profile Parameters (Bryan review, PR #55)
+Remove version overrides from global profile parameters:
+```
+// WRONG: Global param "CudaVersion" lets users pick any version
+// RIGHT: Pin version in dependency step; users create custom profiles for other versions
+// Reason: CRC team can't own SLA for untested version combinations
+```
+
+## 50. Pluggable Authentication Pattern (Yang, PR #309)
+Layered auth with fallback: SAS → connection string → managed identity → certificate:
+```csharp
+// OptionFactory parses: "EndpointUrl=...;;;TokenType=ManagedIdentity"
+// CertificateManager: thumbprint lookup → issuer/subject → chain validation
+// BlobManager accepts TokenCredential abstraction from Azure.Core
+```
+
+## 51. Role-Aware API Port Configuration (Bryan, PR #33)
+CLI supports both single port and role-specific mapping:
+```bash
+# Single port for all roles
+--api-port 4500
+
+# Role-specific ports
+--api-port 4500/Client,4501/Server
+```
+Centralized in ApiClientManager with default 4500.
+
+## 52. Group Reporting for Multi-Job FIO (Bryan, PR #28)
+Always use `--group_reporting` when FIO runs multiple jobs:
+```
+# Without: each job reports separately, including zero values for unused metrics
+# With: results aggregated across all jobs in a single report
+--group_reporting --output-format=json
+```
+
+## Bryan's Review Meta-Patterns (synthesized from 50+ review comments)
+1. **Naming is architecture** — Names define user mental models; get them right first
+2. **Consolidate similar classes** — Cost of abstraction > benefit when logic is similar
+3. **Principle of least privilege** — No public setters; expose minimum access surface
+4. **Test precision** — Assert order AND content, not just containment
+5. **Don't own untested paths** — Pin to validated versions; let users create custom profiles
+6. **Dependencies at bottom** — Profile section ordering is a convention, not optional
+7. **ConfigureAwait(false) is dead** — .NET removed the need; delete it everywhere
+8. **State for idempotency** — Track installations/changes to enable clean resets
+9. **Consistency is non-negotiable** — Usings inside namespace, license headers, tab alignment
