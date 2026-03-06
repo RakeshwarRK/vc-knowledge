@@ -1,74 +1,109 @@
-# PR Training Loop — Summary Report
+# PR Training Loop — Summary Report (Updated)
 
 ## Overview
 
-**Training Period**: Single session, 7 rounds
-**PRs Studied**: 7 (all by brdeyo/Bryan except noted)
-**Patterns Extracted**: 28 (up from 10 pre-training)
-**Knowledge Files Updated**: patterns.md, error-handling.md, vision.md
+**Training Sessions**: 2
+**PRs Studied**: ~35 (deep study: 19, rapid scan: 8, review mining: 8)
+**Patterns Extracted**: 52 + Bryan's Review Meta-Patterns
+**Knowledge Files Updated**: patterns.md, error-handling.md, vision.md, training-plan.md
 
-## Training Rounds
+## Session 1: Deep Study (11 PRs)
 
-| Round | PR | Title | Size | Key Insight |
-|-------|-----|-------|------|-------------|
-| 1 | #576 | Controller/Agent Architecture | +4400/-800, 58 files | Template method SSH fan-out, automatic behavior inference, cross-process Mutex sync |
-| 2 | #595 | Status Code Registry | +1200/-100, 20 files | Subcategory status codes, exhaustive enum enforcement test, stderr for orchestration |
-| 3 | #606 | Kernel Race Condition Fix | +300/-50, 8 files | Opt-in behavior, absolute timeout, graceful degradation to -1, TryGetValue helper |
-| 4 | #549 | FIO SingleProcessAggregated | +2400/-2200, 50 files | Flatten base classes, push platform logic to profiles, FIO job files, precise test fixtures |
-| 5 | #494 | Script Subcommands | +1000/-240, 31 files | Profile as universal execution model, backward-compatible CLI promotion |
-| 6 | #547 | SSH Client Refactor for SCP | +1700/-580, 28 files | Compose related clients behind one interface, IFileSystem in infrastructure |
-| 7 | #627 | Path Handling & ScriptExecutor | +485/-216, 15 files | Fix regex at foundation, capture in finally, fully-qualified path check first |
+| Round | PR | Author | Title | Patterns |
+|-------|-----|--------|-------|----------|
+| 1 | #576 | brdeyo | Controller/Agent Architecture | 11-15 |
+| 2 | #595 | brdeyo | Status Code Registry | error-handling |
+| 3 | #606 | brdeyo | Kernel Race Condition Fix | error-handling |
+| 4 | #549 | brdeyo | FIO SingleProcessAggregated | 16-20 |
+| 5 | #494 | brdeyo | Script Subcommands | 21-23 |
+| 6 | #547 | brdeyo | SSH Client Refactor for SCP | 24-25 |
+| 7 | #627 | brdeyo | Path Handling & ScriptExecutor | 26-28 |
+| 8 | #565 | brdeyo | Disk Mount Permissions | 29-33 |
+| - | #636 | RakeshwarK | MetricFilters (self-review) | reviewed |
+| - | #625 | RakeshwarK | NCPS Workload (self-review) | reviewed |
+
+## Session 2: Full Sweep (24+ PRs)
+
+### Bryan Deep Study (8 PRs)
+| PR | Title | Patterns |
+|----|-------|----------|
+| #158 | Metadata Contract | 34-35 |
+| #486 | Event Log Monitors | 36 |
+| #163 | --fail-fast option | 37 |
+| #503 | Extension propagation bug | 38 |
+| #618 | Geekbench kill -9 0 | 39 |
+| #631 | Core directories race | 40 |
+| #28 | FIO grouped job results | 52 |
+| #33 | Custom API ports | 51 |
+
+### Yang Deep Study (8 PRs)
+| PR | Title | Patterns |
+|----|-------|----------|
+| #412 | Metric verbosity (original) | 42 |
+| #429 | ParallelLoopExecution | 41 |
+| #309 | Certificate + managed identity | 50 |
+| #449 | --logger CLI | scanned |
+| #519 | Summary logger formatting | scanned |
+| #190 | DiskSpd parser redesign | scanned |
+| #325 | Long file paths Windows | scanned |
+| #318 | ASP.NET server/client | scanned |
+
+### Bryan Review Mining (8 PRs by other contributors)
+| PR | Author | Bryan Comments | Key Lessons |
+|----|--------|---------------|-------------|
+| #55 | nmalkapuram | 15 | Consolidate executors, naming, pin versions |
+| #65 | nmalkapuram | 12 | Least privilege, naming, test precision |
+| #46 | nmalkapuram | 4 | Naming conventions, least privilege |
+| #168 | deep1712 | 8 | State tracking, IsSupported, naming |
+| #562 | saibulusu | 4 | Scenario naming, Duration pattern |
+| #575 | saibulusu | 3 | Block sizes, Duration in CLI |
+| #543 | imadityaa | 1 | Plural naming |
+| #544 | imadityaa | 1 | SequentialExecution naming |
 
 ## Growth Assessment
 
-### Before Training (Patterns 1-10)
-- Understood basic executor lifecycle, process execution, retry, metrics capture
-- Knew surface-level patterns: platform guards, state management, error ranges
-- Would write correct but conventional C# solutions
+### Capability Matrix (updated)
 
-### After Training (Patterns 1-28)
-- **Architecture**: Understand when to flatten base classes vs. inherit, compose vs. extend, push to profile vs. hard-code
-- **Bryan's Design Philosophy**: Automatic inference > user knobs, opt-in risky behavior, graceful degradation > throwing, build-time enforcement
-- **Infrastructure**: SSH fan-out, cross-process Mutex, kernel race conditions, SCP file transfer
-- **Testing**: Precise test fixtures, exhaustive enum tests, mock disk topology matching real systems
-- **CLI Design**: Profile as universal execution model, backward-compatible command promotion
-- **Domain**: FIO job file generation, status code registries, process exit code race conditions
+| Capability | Session 1 | Session 2 | Evidence |
+|-----------|-----------|-----------|----------|
+| Write a new workload executor | Good | Strong | Studied 20+ executor patterns |
+| Framework design | Good | Strong | Metadata contract, fail-fast, monitors |
+| Workload onboarding | Good | Strong | Reviewed 10+ onboarding PRs |
+| Test precision | Moderate | Strong | Pattern 46: sequential removal assert |
+| Review quality | Moderate | Strong | 50+ Bryan review comments internalized |
+| Naming conventions | Moderate | Expert | 15+ naming corrections studied |
+| Error handling | Moderate | Strong | Fail-fast, race conditions, SafeKill |
+| Cross-cutting changes | Moderate | Strong | Verbosity migration, timespan migration |
+| Platform-specific code | Moderate | Strong | Monitor patterns, mount paths, permissions |
 
-### Capability Matrix
+### Bryan's Design Principles (Final Synthesis — 9 principles)
 
-| Capability | Before | After | Evidence |
-|-----------|--------|-------|----------|
-| Write a new workload executor | Good | Good | Already knew pattern |
-| Write a new parser | Good | Good | Already knew pattern |
-| Design a multi-process model | Poor | Strong | FIO SingleProcessAggregated (PR #549) |
-| Design controller/agent architecture | None | Strong | PR #576 template method + SSH |
-| Handle kernel-level edge cases | None | Moderate | PR #606 race condition pattern |
-| Design CLI subcommands | Weak | Strong | PR #494 ExecuteCommand pattern |
-| Write precise test fixtures | Weak | Moderate | PR #549 mock disk refactor |
-| Choose inheritance vs. composition | Moderate | Strong | PR #549 base class deletion |
-| Push decisions to profile layer | Weak | Strong | PR #549 Engine calculate() |
+1. **Automatic inference over configuration** — If the system can figure it out, don't ask
+2. **Opt-in risky behavior** — Dangerous features default off, require explicit activation
+3. **Graceful degradation over throwing** — Return -1, log warning, continue
+4. **Build-time enforcement** — Exhaustive tests, not runtime checks
+5. **Profile as single source of truth** — Platform values, timing, engine all in profiles
+6. **Naming is architecture** — Names define mental models; get them right first
+7. **Consolidate similar abstractions** — Cost of abstraction > benefit when logic is similar
+8. **Principle of least privilege** — No public setters; expose minimum surface
+9. **Consistency is non-negotiable** — Naming, ordering, formatting are conventions, not optional
 
-### Bryan's Design Principles (Synthesized)
+### Yang's Review Style (distinct from Bryan)
+- Practical/operational: "How long does this take?", "Does this work on ARM?"
+- Parameter overridability: "Let this reference the top parameter"
+- Platform specificity: "Is this Ubuntu-specific? Name it deb if superset"
+- Docs quality: "Run npm start locally to verify", "Update broken links"
 
-1. **Automatic inference over configuration** — If the system can figure it out, don't ask the user
-2. **Opt-in risky behavior** — Dangerous features default to off and require explicit activation
-3. **Graceful degradation over throwing** — Return -1, log warning, continue; don't crash the pipeline
-4. **Build-time enforcement** — Exhaustive tests over runtime checks; catch mistakes at compile/test time
-5. **Profile as single source of truth** — Platform-specific values, timing, engine selection all in profiles
-6. **Flatten when inheritance costs more than it saves** — Shared property bags aren't real inheritance
-7. **Universal pipeline** — Everything flows through the profile execution path for consistent telemetry
+## Remaining Work
 
-## Remaining Training Queue
+### Next Session Priority
+1. Continue Yang's 130+ remaining PRs (batch rapid scan)
+2. Mine ericavella's Sysbench/DB patterns with Yang reviews
+3. Study PR #36 (SPEC commercial workloads, 30K lines) — dedicated time
+4. Study PR #563 (log upload schema, 7K lines) — dedicated time
 
-| PR | Title | Learning Value | Status |
-|----|-------|---------------|--------|
-| #563 | Log file telemetry upload (CSV/JSON/YAML) | Schema design, multi-format parsing | Skipped (7200+ lines) |
-| #565 | Disk mount permissions refactor | Linux disk lifecycle | Not started |
-| #579 | .NET 8.0 targeting for Framework | Multi-targeting patterns | Not started |
-
-## Recommendations
-
-1. **Continue training in next session** — PR #563 (log upload schema) is high-value but needs dedicated time for its size
-2. **Apply learnings to extension repo** — The verbosity migration task doc is ready; patterns 16-17 (flatten/push to profile) are directly applicable
-3. **Vision doc** — Needs more input on commercial workload licensing, GPU abstraction direction, and metric classification framework
-4. **CRC SDK comparison** — Create separate repo when ready; use cross-repo loading for comparison sessions
+### Future Training Opportunities
+1. Code review simulation — write reviews before seeing actual reviews
+2. Blind workload onboarding — design executor for unknown tool
+3. CRC SDK comparison — when separate repo is ready
+4. Bryan's rejected PRs — understand abandoned approaches
