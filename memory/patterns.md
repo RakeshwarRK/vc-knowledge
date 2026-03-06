@@ -243,3 +243,60 @@ string targetCommand = originalArgs
 - Hard-coding platform paths (use `PlatformSpecifics` helpers)
 - Resolving `$.Parameters.*` on controller side when executing remotely
 - Using `await` with `Mutex` (thread affinity requirement)
+
+## 16. Flatten Premature Base Classes (PR #549)
+When a base class becomes a shared property bag that subclasses use differently, delete it:
+```csharp
+// BEFORE: DiskWorkloadExecutor base class shared by FIO + DiskSpd
+// Properties like DiskFilter, ProcessModel, FileName lived in base
+// But FIO needed Engine, DiskSpd had different semantics
+
+// AFTER: Each tool owns its own properties directly
+public class FioExecutor : VirtualClientComponent  // NOT : DiskWorkloadExecutor
+{
+    public string Engine { get; }      // FIO-specific
+    public string DiskFilter { get; }  // Owns its own
+    public string ProcessModel { get; }
+}
+```
+
+## 17. Push Platform Logic to Profiles (PR #549)
+Use `calculate()` expressions for platform-specific values instead of C# conditionals:
+```json
+// BEFORE: FioExecutor.GetIOEngine() static method with switch(platform)
+// AFTER: Profile parameter with calculate expression
+{
+    "Engine": "{calculate(\"{Platform}\".StartsWith(\"linux\") ? \"libaio\" : \"windowsaio\")}"
+}
+```
+This makes the IO engine configurable without code changes.
+
+## 18. Separation of Concerns for Disk Lifecycle (PR #549)
+Mount point creation, formatting, and workload execution should be independent steps:
+```
+// WRONG: FioExecutor.CreateMountPointsAsync() inside ExecuteAsync()
+// RIGHT: MountDisks dependency runs as a separate profile step before FIO
+```
+The executor should find disks and use them, not manage their lifecycle.
+
+## 19. Precise Test Fixtures (PR #549)
+Test helpers should accept exact device paths instead of generating generic mocks:
+```csharp
+// BEFORE: fixture.CreateDisks(PlatformID.Unix, withVolume: true)
+//   → Returns 4 generic disks with auto-generated paths
+
+// AFTER: fixture.CreateDisk(1, PlatformID.Unix, os: false, "/dev/sdc", "/dev/sdc1", "/dev/sdc2")
+//   → Precise control: disk path + partition paths match real topology
+```
+
+## 20. FIO Job Files for Multi-Disk Aggregation (PR #549)
+When aggregating results across N disks in one process, use FIO's native job file:
+```ini
+# Dynamically generated job file
+[fio_randwrite_496GB_4k_d32_th16_1]
+filename=/home/user/mnt_dev_sdc1/fio-test.dat
+
+[fio_randwrite_496GB_4k_d32_th16_2]
+filename=/home/user/mnt_dev_sdd1/fio-test.dat
+```
+Key: strip `--name` from command line args when using job file (it overrides job names).
