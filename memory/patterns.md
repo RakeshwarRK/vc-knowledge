@@ -300,3 +300,99 @@ filename=/home/user/mnt_dev_sdc1/fio-test.dat
 filename=/home/user/mnt_dev_sdd1/fio-test.dat
 ```
 Key: strip `--name` from command line args when using job file (it overrides job names).
+
+## 21. Profile as Universal Execution Model (PR #494)
+Even ad-hoc commands flow through the profile pipeline for consistent telemetry:
+```csharp
+// "VirtualClient pwsh script.ps1" becomes:
+this.Parameters["Command"] = fullCommand;
+this.Parameters["Scenario"] = $"Execute-{commandName}";
+this.Profiles = new[] { "EXECUTE-COMMAND.json" };
+return base.ExecuteAsync(args, cancellationTokenSource);  // Same profile flow
+```
+
+## 22. Inherit and Specialize CLI Commands (PR #494)
+New execution modes extend existing command classes:
+```csharp
+// ExecuteCommand extends ExecuteProfileCommand
+// Can handle both bare commands AND profile execution
+internal class ExecuteCommand : ExecuteProfileCommand
+{
+    public override Task<int> ExecuteAsync(...)
+    {
+        if (!String.IsNullOrWhiteSpace(this.Command))
+            return this.ExecuteCommandAsync(...);  // New path
+        else if (this.Profiles?.Any() == true)
+            return this.ExecuteProfilesAsync(...);  // Existing path
+    }
+}
+```
+
+## 23. Backward-Compatible CLI Promotion (PR #494)
+Make required options optional when adding new capabilities:
+```csharp
+// --profile became optional (was required)
+// Root handler changed from RunProfileCommand to ExecuteCommand (superset)
+// TreatUnmatchedTokensAsErrors = false on root command
+// All existing CLI usage continues to work unchanged
+```
+
+## 24. Compose Related Clients Behind One Interface (PR #547)
+When two library clients share connection info, wrap them in a single proxy:
+```csharp
+public class SshClientProxy : ISshClientProxy
+{
+    internal SshClient SessionClient { get; }   // For command execution
+    internal ScpClient SessionScpClient { get; } // For file copy
+    
+    public async Task ConnectAsync(CancellationToken ct)
+    {
+        await this.SessionClient.ConnectAsync(ct);
+        await this.SessionScpClient.ConnectAsync(ct);
+    }
+}
+```
+
+## 25. Use IFileSystem Abstractions in Infrastructure (PR #547)
+File operations in infrastructure code use `IFileInfo`/`IDirectoryInfo` for testability:
+```csharp
+Task CopyFromAsync(string remoteFilePath, IFileInfo destination, CancellationToken ct);
+Task CopyToAsync(IDirectoryInfo source, string remoteDirectoryPath, CancellationToken ct);
+// NOT: Task CopyFrom(string remotePath, string localPath) — untestable
+```
+
+## 26. Fix Regex at the Foundation (PR #627)
+Path detection regex must be precise — anchor, single char, handle both slash types:
+```csharp
+// BEFORE (fragile): Regex.IsMatch(path, "[A-Z]+:\\\\|^/")
+//   Matched "ABC:\\", didn't handle forward slashes on Windows
+
+// AFTER (correct): Regex.IsMatch(path.Trim(), @"^[A-Z]{1}:[\\\\/]|^\/")
+//   Anchored, single drive letter, handles / and \ on Windows
+```
+
+## 27. Capture Metrics/Logs in Finally (PR #627)
+Even if the workload throws, capture available metrics and logs:
+```csharp
+try
+{
+    await this.LogProcessDetailsAsync(process, telemetryContext, this.ToolName);
+    process.ThrowIfWorkloadFailed();
+}
+finally
+{
+    await this.CaptureMetricsAsync(process, telemetryContext, cancellationToken);
+    await this.CaptureLogsAsync(cancellationToken);
+}
+```
+
+## 28. Fully-Qualified Path Check First (PR #627)
+When resolving paths, check the most specific/certain case first:
+```csharp
+if (PlatformSpecifics.IsFullyQualifiedPath(this.ScriptPath))
+    this.ExecutablePath = this.ScriptPath;           // Most certain
+else if (!string.IsNullOrWhiteSpace(this.PackageName))
+    // Resolve relative to package                   // Next most certain
+else
+    // Resolve relative to VC root                   // Fallback
+```
