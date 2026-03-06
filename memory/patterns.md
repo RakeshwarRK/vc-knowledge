@@ -1164,3 +1164,17 @@ Dedicated dependency for build compiler. Params: `CompilerVersion` (empty = syst
 
 ### 153. Don't Over-Apply Cross-Cutting Patterns
 MetricScenario and Tags exist in OpenSSL but NOT CoreMark. Not all profiles use the same cross-cutting params. Always check executor source or similar profiles before assuming a pattern is universal. False positives (adding unnecessary params) are as wrong as false negatives (missing required params).
+
+### 154. Scenario Naming — 6 Rules
+1. Prefix with tool name ONLY in combined multi-tool profiles (`NTttcp_TCP_...`, `SockPerf_TCP_...`)
+2. Use native benchmark test names when available (`oltp_read_write`, `memtier_8t_16c_32b_r1:1`)
+3. Encode ALL varying dimensions in name (`RandomWrite_4k_BlockSize`, `NTttcp_TCP_4K_Buffer_T32`)
+4. Case: PascalCase for IO patterns, lowercase for sizes, UPPERCASE for protocols, original case for native names
+5. Special prefixes: `DiskFill` (prep), `warmup_` (pre-populate), `DataIntegrity_` (verification), `Execute...Benchmark` (single formal benchmark)
+6. For single-scenario workloads: `Execute{Tool}Benchmark` or `{WhatItMeasures}`
+
+### 155. Dynamic MetricScenario with Variable Substitution
+`MetricScenario` can be a runtime template: `cpustress_t{ThreadCount}_fft{MaxTortureFFT}_{Duration.TotalMinutes}mins`. Variables resolve at runtime creating metric names like `cpustress_t7_fft512_15mins`. Enables metric differentiation when users override params via CLI.
+
+### 156. Min/Max Range Parameters for Tool-Native Configs
+Always use the tool's native parameter names. Prime95 has `MinTortureFFT`/`MaxTortureFFT` (range, set equal for single FFT). Don't invent `FFTSize` abstraction — it hides the tool's range capability and doesn't match the CLI.
