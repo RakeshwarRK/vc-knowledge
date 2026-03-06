@@ -22,6 +22,8 @@ One-stop memory store for [microsoft/VirtualClient](https://github.com/microsoft
 | [build-and-packaging.md](memory/build-and-packaging.md) | Build commands, pipelines, vcpkg format |
 | [docs-catalog.md](memory/docs-catalog.md) | Full documentation catalog, dependency/monitor components, GitHub issues |
 | [pr-history.md](memory/pr-history.md) | Complete PR #1-#651 timeline, breaking changes, deprecations, contributor map |
+| [vision.md](memory/vision.md) | VC purpose, design philosophy, strategic direction, open questions |
+| [training-summary.md](memory/training-summary.md) | PR training loop results: 7 rounds, 28 patterns, capability growth |
 | [recent-activity.md](memory/recent-activity.md) | Recent commits/PRs — auto-updated weekly by GitHub Actions |
 
 ## Quick Reference
@@ -30,5 +32,6 @@ One-stop memory store for [microsoft/VirtualClient](https://github.com/microsoft
 - **Platforms:** linux-x64, linux-arm64, win-x64, win-arm64
 - **Profiles:** 85 total (54 PERF, 5 MONITORS, 6 EXAMPLE, 4 POWER, 16 utility/setup)
 - **Workloads:** 40+ (CPU, disk, memory, network, database, GPU/ML, HPC, compression, web, stress, power)
+- **Design patterns:** 28 documented (lifecycle, SSH fan-out, process models, CLI design, etc.)
 - **Key patterns:** VirtualClientComponent lifecycle, client/server coordination, metric filtering, CPU affinity
 - **Auto-update:** GitHub Actions runs weekly (Sunday 06:00 UTC) to refresh recent-activity.md
