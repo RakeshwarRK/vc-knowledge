@@ -1303,3 +1303,19 @@ If a parameter exists in top-level `Parameters`, the Action MUST reference it vi
 9. Does it need a GPU driver? → AMDGPUDriverInstallation or NvidiaCudaInstallation chain
 10. Is it client-server? → ApiServer (always last)
 11. Does it need Windows packages? → ChocolateyInstallation → ChocolateyPackageInstallation
+
+### 191. Parser Architecture: 4 Approaches by Output Format
+Choose parser approach based on workload output: **JSON** → `JObject.Parse` + `SelectToken` (FIO, cleanest); **YAML** → `YamlDotNet` with typed models (StressNg, simplest ~127 LOC); **Tabular text** → `Sectionize` + `ConvertToDataTable` + `GetMetrics` (DiskSpd, GeekBench); **Irregular text** → Regex capture groups + manual DataTable (OpenSSL, most complex ~527 LOC). Always extend `MetricsParser`, override `Parse()`, return `IList<Metric>`.
+
+### 192. Contributor Review Friction Map
+**Lightest review**: deep1712 (GPU-focused, small PRs, quick merge). **Fastest iteration**: saibulusu (responds within hours, FIO expert, Bryan's profile feedback). **Heaviest Yang review**: imadityaa (framework internals, Socratic questioning, 10+ round PRs). **Heaviest Bryan review**: nchapagain001 (security features, Bryan reworks foundations underneath). **Root-cause enforcement**: Bryan rejected cjhillbrand #535 entirely — fix the root cause, not the symptom.
+
+### 193. Bryan vs Yang Review Style
+Bryan is **directive**: "do it this way", "naming: X", rejects symptomatic fixes, enforces root-cause thinking, specific about profile design. Yang is **Socratic**: "why do you need this?", "can't you use existing class X?", pushes toward simpler implementations. Bryan reviews profile design and architecture; Yang reviews framework code and convention compliance. Both are final authorities — Yang escalates to Bryan on design disagreements.
+
+### 194. Contributor Prediction Rules
+- **deep1712**: Quick merge, GPU lane. Predict: approval with minor Yang nits (naming, null checks). Rarely Bryan-reviewed.
+- **saibulusu**: FIO/profile work. Predict: Bryan profile-design feedback (scenario naming, Duration patterns). Fast iteration.
+- **imadityaa**: Framework features. Predict: Yang deep questioning on design necessity, multi-round. Bryan on naming only.
+- **nchapagain001**: Infrastructure/security. Predict: Bryan heavy architectural feedback, long cycle. Possible Bryan rework underneath.
+- **cjhillbrand**: Limited data, monitor features. Predict: Bryan root-cause check on any non-trivial change.
