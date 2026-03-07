@@ -1260,3 +1260,37 @@ If a parameter should be fixed for reproducibility (Version, Options), hardcode 
 
 ### 179. RecommendedMinimumExecutionTime Reflects Full Algorithm Coverage
 LZBench with `-eall` (all algorithms) needs 18 hours. Don't guess execution times — they depend on the specific options/scenarios. Workloads testing all variants of something (all algorithms, all block sizes, all thread counts) need much longer than single-variant runs.
+
+### 180. AMD GPU Dependency Chain
+Pattern: `DependencyPackageInstallation(amdgpudriver)` → `AMDGPUDriverInstallation` → `DependencyPackageInstallation(benchmark)`. Used by Blender, 3DMark, FLOPS, SPECviewperf. Driver install is separate dependency type; PSTools often included for Windows process management.
+
+### 181. NVIDIA GPU Dependency Chain
+Pattern: `[FormatDisks → MountDisks →] NvidiaCudaInstallation → DockerInstallation → NvidiaContainerToolkitInstallation [→ DCGMIInstallation]`. ML workloads need FormatDisks/MountDisks for data storage. SuperBench adds `LinuxPackageInstallation(sshpass,python3-pip)`. MLPerf Training adds `DCGMIInstallation` for GPU monitoring.
+
+### 182. Java Workload Dependencies
+`JDKPackageDependencyInstallation` — dedicated dependency type for JDK. SPECjbb: `DependencyPackageInstallation → JDKPackageDependencyInstallation`. SPECjvm: adds `LinuxPackageInstallation(xfce4)` because it needs a display server for GUI-based benchmarks.
+
+### 183. .NET Workload Dependencies
+`DotNetInstallation` — dedicated dependency type for .NET SDK. ASP.NET profiles also need `ChocolateyInstallation → ChocolateyPackageInstallation(git) → GitRepoClone` for source code, plus `SetEnvironmentVariable` for server config.
+
+### 184. SPEC CPU Dependency Pattern (All 4 Variants Identical)
+FPRATE, FPSPEED, INTRATE, INTSPEED all use: `ChocolateyInstallation → ChocolateyPackageInstallation(cygwin) → CompilerInstallation(CygwinPackages=gcc-g++,gcc-fortran,gcc-core,libiconv-devel) → DependencyPackageInstallation(speccpu2017)`. Same blob, same toolchain — only the Action scenario differs.
+
+### 185. Workload-Specific Installation Types
+Some workloads have bespoke dependency types: `OpenFOAMInstallation`, `AMDGPUDriverInstallation`, `DCGMIInstallation`, `NvidiaCudaInstallation`. These handle complex, vendor-specific installation logic that can't be captured by generic types. When in doubt, check if a `*Installation` type exists for the workload.
+
+### 186. Zero-Dependency Profiles Exist
+PERF-GPU-SUPERBENCH has NO Dependencies section at all — the executor handles everything internally (Docker image pull, benchmark setup). This is rare but valid when the workload is fully self-contained.
+
+### 187. Dependency Chain Decision Tree (Updated with 30+ Profiles)
+1. Does it need disk I/O? → FormatDisks + MountDisks
+2. Is it a system package (apt/yum)? → LinuxPackageInstallation
+3. Does it need compilation? → CompilerInstallation (+ ChocolateyInstallation chain if Windows)
+4. Is it a pre-built binary? → DependencyPackageInstallation (blob store)
+5. Is it a live source repo? → GitRepoClone
+6. Is it a URL download? → WgetPackageInstallation
+7. Does it need Java? → JDKPackageDependencyInstallation
+8. Does it need .NET? → DotNetInstallation
+9. Does it need a GPU driver? → AMDGPUDriverInstallation or NvidiaCudaInstallation chain
+10. Is it client-server? → ApiServer (always last)
+11. Does it need Windows packages? → ChocolateyInstallation → ChocolateyPackageInstallation
