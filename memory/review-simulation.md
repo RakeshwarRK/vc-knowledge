@@ -38,6 +38,8 @@
 | LAPACK | 4.3/10 (43%) | Chocolatey chain unknown, platform 171 violation |
 | LZBench | 6.0/10 (60%) | CompilerInstallation missed, wrong param architecture |
 | **PostgreSQL TPCC** | **9.5/10 (95%)** | **Database translation pattern validated — near-perfect** |
+| LZBench | 6.0/10 (60%) | CompilerInstallation missed, wrong param architecture |
+| **SPECjbb** | **8.3/10 (83%)** | **First non-database >80%! Dep catalog working** |
 
 ### Domain Knowledge Coverage
 | Workload | WHY Understood | Key Insight |
@@ -87,6 +89,12 @@
 | 22 | LAPACK blind design | 4.3/10 — Chocolatey chain miss | 172-175 |
 | 23 | LZBench blind design | 6.0/10 — CompilerInstallation miss | 176-179 |
 | 24 | PostgreSQL TPCC blind design | **9.5/10 — database translation confirmed!** | (validation) |
+| 25 | LZBench blind design | 6.0/10 — CompilerInstallation miss | 176-179 |
+| 26 | **SPECjbb blind design** | **8.3/10 — first non-DB >80%!** | 187-189 |
+| 27 | PR #651 blind review | 5 issues found (code dup, breaking change, shared type) | (review drill) |
+| 28 | Dependency catalog sweep (30+ profiles) | Full co-occurrence patterns | 180-186, 190 |
+| 29 | Parser architecture analysis (5 parsers) | 4 approaches by format | 191 |
+| 30 | Contributor review patterns (5 contributors) | Prediction rules derived | 192-194 |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -98,4 +106,4 @@
 | 4b (deep drills) | 10 | 98 |
 | 5 (mastery drills) | 38 | 136 |
 | 5c (continued) | 28 | 164 |
-| 6 (executor-first) | 15 | **179** |
+| 6 (executor-first+catalog) | 30 | **194** |
