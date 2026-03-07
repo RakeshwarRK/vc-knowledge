@@ -1248,3 +1248,15 @@ Use domain-specific scenario names: `LinearEquations` (LAPACK), `CPUStress` (Str
 
 ### 175. Empty String Parameter Defaults
 `"CompilerVersion": ""` means "use whatever system default exists." Empty string is a valid default for optional parameters — it signals the executor should use its own default logic rather than a specific value.
+
+### 176. CompilerInstallation Replaces Manual Build Tool Installation
+Don't install `make`, `gcc` via `LinuxPackageInstallation`. Use `CompilerInstallation` instead — it installs the full compiler toolchain (gcc, make, etc.) across platforms. Only add `LinuxPackageInstallation` for non-build-tool packages (unzip, wget, etc.). CompilerInstallation already learned in Pattern 150; this is the enforcement rule.
+
+### 177. Top-Level Parameters = User-Overridable Only
+If a parameter should be fixed for reproducibility (Version, Options), hardcode it in the Action. Only promote to top-level Parameters when users should override via `--parameters`. LZBench: Version/Options fixed in Action, only CompilerVersion (infrastructure concern) at top level.
+
+### 178. System Utilities Assumed Present
+`git`, `wget`, `curl` are assumed present on Linux VMs — don't install them via dependencies. Only install non-universal packages (unzip, specific libraries, pbzip2). The executor can use these utilities directly in InitializeAsync without corresponding dependencies.
+
+### 179. RecommendedMinimumExecutionTime Reflects Full Algorithm Coverage
+LZBench with `-eall` (all algorithms) needs 18 hours. Don't guess execution times — they depend on the specific options/scenarios. Workloads testing all variants of something (all algorithms, all block sizes, all thread counts) need much longer than single-variant runs.
