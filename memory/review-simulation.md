@@ -29,7 +29,13 @@
 | SockPerf (network) | 1.9/10 (19%) | Wrong architecture (combined suite, meta-orchestrator) |
 | CoreMark | 3.7/10 (37%) | Over-applied OpenSSL patterns, wrong dep types |
 | OpenSSL | 5.0/10 (50%) | Algorithm coverage perfect, missed Tags/MetricScenario/threading |
-| Prime95 | 6.9/10 (69%) | Naming rules + calculate expression perfect, best score yet |
+| Prime95 | 6.9/10 (69%) | Naming rules + calculate expression perfect |
+| LMBench | 7.1/10 (71%) | First >70%, per-config RecommendedMin |
+| Ping | 7.3/10 (73%) | v1→v2 network evolution |
+| PostgreSQL OLTP | **8.5/10 (85%)** | Database mastery — reference translation |
+| StressNg | 4.4/10 (44%) | Used blob install for system package |
+| GeekBench | 7.2/10 (72%) | Executor-first, decent |
+| LAPACK | 4.3/10 (43%) | Chocolatey chain unknown, platform 171 violation |
 
 ### Domain Knowledge Coverage
 | Workload | WHY Understood | Key Insight |
@@ -72,6 +78,11 @@
 | 15 | Command line pattern analysis (7 profiles) | Two models identified | 157-158 |
 | 16 | Dependency catalog drill (18 profiles) | 21 types, 7 combinations | 159-160 |
 | 17 | LMBench profile blind design | **7.1/10 — first >70%!** | 161-164 |
+| 18 | Ping profile blind design | 7.3/10 | 165-166 |
+| 19 | PostgreSQL OLTP blind design | **8.5/10 — new high, database mastery!** | 167 |
+| 20 | StressNg blind design | 4.4/10 — system pkg mistake | 168-171 |
+| 21 | GeekBench blind design | 7.2/10 — executor-first decent | (lessons) |
+| 22 | LAPACK blind design | 4.3/10 — Chocolatey chain miss | 172-175 |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -82,4 +93,5 @@
 | 4a (drills) | 8 | 88 |
 | 4b (deep drills) | 10 | 98 |
 | 5 (mastery drills) | 38 | 136 |
-| 5c (continued) | 28 | **164** |
+| 5c (continued) | 28 | 164 |
+| 6 (executor-first) | 11 | **175** |
