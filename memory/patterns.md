@@ -1221,3 +1221,30 @@ PERF-NETWORK.json (v1) uses `NetworkingWorkloadExecutor` (meta-orchestrator) wit
 
 ### 166. Executor Runtime Environment Setup
 OpenSSL executor sets `LD_LIBRARY_PATH` on Linux and appends to `PATH` on Windows. This is done in the executor, not the profile. Executors handle platform-specific environment variable setup so profiles stay clean. Similarly, `-multi {ProcessorCount}` is injected by the executor, not specified in profile CommandArguments.
+
+### 167. Database Profile Translation Pattern
+MySQL→PostgreSQL profiles share: identical Actions (SysbenchClient/ServerExecutor), identical Sysbench scenarios, identical sysbench package. Differences: DB-specific dependency types (`MySQLServer*` → `PostgreSQLServer*`), DB-specific config params (`InnodbBufferPoolSize` → `SharedMemoryBuffer`), action names (`CreateDatabase` → `SetupDatabase`), package names (`mysql-server` → `postgresql`), port (`3306` → `5432`).
+
+### 168. System Packages Don't Need PackageName
+When a tool is installed via `LinuxPackageInstallation` (apt/yum), it's on PATH system-wide — no `PackageName` param needed in the Action. stress-ng, fio (Linux), make, gcc are system packages. Only tools from `DependencyPackageInstallation` or `WgetPackageInstallation` need PackageName for path resolution.
+
+### 169. Profile Minimalism: Don't Override Executor Defaults
+If the executor auto-injects flags (StressNg: `--cpu`, `--metrics`, `--yaml`; OpenSSL: `-multi`), DON'T include them in the profile CommandLine. Profile should only specify what the user needs to control. Minimal profiles let executor defaults handle the rest.
+
+### 170. Simple Profiles Don't Need Top-Level Parameters
+GeekBench has ONE scenario with a hardcoded `--no-upload` CommandLine — no top-level Parameters block at all. Only use top-level Parameters when: (a) multiple scenarios share values, or (b) values should be user-overridable via `--parameters` CLI.
+
+### 171. Profile Platform = What's Tested, Not What Executor Supports
+StressNg executor supports `win-x64,win-arm64` but profile is Linux-only. Profile `SupportedPlatforms` reflects what's been validated in CI, not what code theoretically handles. Don't add platforms without test evidence.
+
+### 172. Chocolatey Dependency Chain for Windows Tools
+Cygwin installs via `ChocolateyInstallation` → `ChocolateyPackageInstallation`, NOT blob download. LAPACK profile: first install Chocolatey itself (`PackageName: "chocolatey"`), then install Cygwin package through it (`Packages: "cygwin"`). This is a distinct dependency pattern from DependencyPackageInstallation (blob) and LinuxPackageInstallation (apt/yum).
+
+### 173. CompilerInstallation CygwinPackages Parameter
+CompilerInstallation accepts `CygwinPackages` param for additional Cygwin-provided tools needed at compile time. LAPACK uses `"CygwinPackages": "gcc-fortran,python3"`. This handles cross-platform build toolchain setup — on Linux these would be system packages, on Windows they come through Cygwin.
+
+### 174. Scenario Names Describe Domain, Not Tool
+Use domain-specific scenario names: `LinearEquations` (LAPACK), `CPUStress` (StressNg), `CaptureSystemThroughput` (StressNg). NOT `ExecuteLAPACK`, `RunStressNg`. The scenario describes *what is being measured*, not *which tool runs*.
+
+### 175. Empty String Parameter Defaults
+`"CompilerVersion": ""` means "use whatever system default exists." Empty string is a valid default for optional parameters — it signals the executor should use its own default logic rather than a specific value.
