@@ -1282,7 +1282,16 @@ Some workloads have bespoke dependency types: `OpenFOAMInstallation`, `AMDGPUDri
 ### 186. Zero-Dependency Profiles Exist
 PERF-GPU-SUPERBENCH has NO Dependencies section at all — the executor handles everything internally (Docker image pull, benchmark setup). This is rare but valid when the workload is fully self-contained.
 
-### 187. Dependency Chain Decision Tree (Updated with 30+ Profiles)
+### 187. MinimumRequiredExecutionTime vs MinimumExecutionInterval
+`MinimumRequiredExecutionTime` (top-level): Enforces minimum total execution duration — VC will not stop before this time. Different from `MinimumExecutionInterval` (minimum between re-executions) and `RecommendedMinimumExecutionTime` (advisory in Metadata). SPECjbb uses `02:00:00` — the benchmark needs at least 2 hours to produce valid results.
+
+### 188. Tags Categorize Workload Domain
+Tags like `"Java"` (SPECjbb), `"Stress"` (StressNg) categorize metrics by domain/technology. Don't confuse with scenario names. Tags appear in telemetry metadata for filtering/aggregation. Add them when a workload belongs to a clearly defined technology category.
+
+### 189. Always Reference Top-Level Parameters from Actions
+If a parameter exists in top-level `Parameters`, the Action MUST reference it via `$.Parameters.X`. SPECjbb: `JavaFlags` is top-level (user-overridable) AND referenced in Action. If not referenced, changing the top-level value has no effect — a silent bug.
+
+### 190. Dependency Chain Decision Tree (Updated with 30+ Profiles)
 1. Does it need disk I/O? → FormatDisks + MountDisks
 2. Is it a system package (apt/yum)? → LinuxPackageInstallation
 3. Does it need compilation? → CompilerInstallation (+ ChocolateyInstallation chain if Windows)
