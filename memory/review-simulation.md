@@ -36,6 +36,8 @@
 | StressNg | 4.4/10 (44%) | Used blob install for system package |
 | GeekBench | 7.2/10 (72%) | Executor-first, decent |
 | LAPACK | 4.3/10 (43%) | Chocolatey chain unknown, platform 171 violation |
+| LZBench | 6.0/10 (60%) | CompilerInstallation missed, wrong param architecture |
+| **PostgreSQL TPCC** | **9.5/10 (95%)** | **Database translation pattern validated — near-perfect** |
 
 ### Domain Knowledge Coverage
 | Workload | WHY Understood | Key Insight |
@@ -83,6 +85,8 @@
 | 20 | StressNg blind design | 4.4/10 — system pkg mistake | 168-171 |
 | 21 | GeekBench blind design | 7.2/10 — executor-first decent | (lessons) |
 | 22 | LAPACK blind design | 4.3/10 — Chocolatey chain miss | 172-175 |
+| 23 | LZBench blind design | 6.0/10 — CompilerInstallation miss | 176-179 |
+| 24 | PostgreSQL TPCC blind design | **9.5/10 — database translation confirmed!** | (validation) |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -94,4 +98,4 @@
 | 4b (deep drills) | 10 | 98 |
 | 5 (mastery drills) | 38 | 136 |
 | 5c (continued) | 28 | 164 |
-| 6 (executor-first) | 11 | **175** |
+| 6 (executor-first) | 15 | **179** |
