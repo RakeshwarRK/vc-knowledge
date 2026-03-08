@@ -95,6 +95,9 @@
 | 28 | Dependency catalog sweep (30+ profiles) | Full co-occurrence patterns | 180-186, 190 |
 | 29 | Parser architecture analysis (5 parsers) | 4 approaches by format | 191 |
 | 30 | Contributor review patterns (5 contributors) | Prediction rules derived | 192-194 |
+| 31 | **PR #648 blind description + review (iter 1)** | Blind: 65%, Review: 2/5 Bryan issues | 195-202 |
+| 32 | **PR #648 re-test (iter 2)** | Blind: 88%, Review: 5/5 Bryan issues | 202a, 203-206 |
+| 33 | **PR #648 deep extraction (iter 3)** | Blind: ~95%, all 16 files predicted | 207-212 |
 
 ### Pattern Count Growth
 | Session | Added | Total |
@@ -107,3 +110,4 @@
 | 5 (mastery drills) | 38 | 136 |
 | 5c (continued) | 28 | 164 |
 | 6 (executor-first+catalog) | 30 | **194** |
+| 7 (PR #648 training) | 18 | **212** |
