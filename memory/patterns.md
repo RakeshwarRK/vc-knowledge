@@ -1319,3 +1319,79 @@ Bryan is **directive**: "do it this way", "naming: X", rejects symptomatic fixes
 - **imadityaa**: Framework features. Predict: Yang deep questioning on design necessity, multi-round. Bryan on naming only.
 - **nchapagain001**: Infrastructure/security. Predict: Bryan heavy architectural feedback, long cycle. Possible Bryan rework underneath.
 - **cjhillbrand**: Limited data, monitor features. Predict: Bryan root-cause check on any non-trivial change.
+
+### 195. Access Modifier Preservation Rule
+When refactoring a property (e.g., auto-property → parameter-backed getter), **never change the access modifier** without explicit justification. If original was `protected`, the refactored version must remain `protected`. Widening from `protected` → `public` during a refactor is a review-blocking issue — it expands the API surface without reason. This is a mechanical check: diff the old and new declarations, verify the modifier is identical.
+
+### 196. Platform Unification Pattern
+When a component has separate `DoSomethingOnWindowsAsync` / `DoSomethingOnUnixAsync` methods that share most logic, unify into a single method. Platform-specific behavior goes inside `if (this.Platform == PlatformID.Unix)` blocks within the unified method. The `[SupportedPlatforms]` attribute on the class replaces runtime `PlatformNotSupportedException` throws. Example: CertificateInstallation unified `InstallCertificateOnWindowsAsync` + `InstallCertificateOnUnixAsync` → single `InstallCertificateOnMachineAsync` (cert store) + `InstallCertificateLocallyAsync` (file export with platform-conditional chmod).
+
+### 197. Auto-Property → Parameter-Backed Getter Migration
+When a component property changes from `protected string X { get; set; }` (set in ExecuteAsync) to a parameter-backed getter `protected string X { get { return this.Parameters.GetValue<string>(nameof(this.X)); } }`, this is a **design improvement**: removes mutable state, makes the value source explicit, ensures consistency with VC's parameter architecture. Check: (1) access modifier preserved, (2) all `this.X = ...` assignments in ExecuteAsync removed, (3) validation (`ThrowIfNullOrWhiteSpace`) still present in ExecuteAsync.
+
+### 198. Extension Methods Over Helper Classes
+Bryan's strong preference: if utility code is used by 1 component, put it in that component. If used by 2+ components, create an **extension method class** (e.g., `CertificateManagerExtensions`), NOT a static helper class. Reason: extension methods compose with existing types and don't create new abstractions. nchapagain001's `CertificateLoaderHelper` was rejected for this reason.
+
+### 199. Certificate Domain Knowledge
+For VC's customer scenarios, only private key certificates (`.pfx`) are needed — no customer scenario requires downloading `.cer` (public key only). Don't over-design for format distinctions that don't exist in practice. Bryan: "No need to make a distinction."
+
+### 200. CLI Option Naming Rules (Updated)
+1. **All kebab-case, lowercase**: `--cert-installation-dir` NOT `--certificateDownloadDir`
+2. **Single option for value-options**: no aliases. E.g., `--token` only, remove `--access-token`
+3. **Flags (no-value) get 1 full name + 1 short flag**: e.g., `--verbose` / `-v`
+4. **Shorter is better** when equally clear: `--token` over `--access-token`
+5. Never use camelCase in CLI options — it's "problematic for users on the command line"
+
+### 201. Bryan Parallel Rework Detection
+Bryan sometimes reworks foundational code underneath a contributor's PR. Signals: (1) Bryan says "we will need to converge" or "I am doing some rework", (2) PR touches infrastructure/integration code (Key Vault, stores, package management), (3) Bryan's review is CHANGES_REQUESTED twice with architectural concerns. When detected: expect merge delays, possible need to rebase onto Bryan's changes.
+
+### 202a. Bryan Naming Preference: Explicit Over Short
+Bryan prefers longer, more explicit property names when clarity is at stake. `AccessTokenFilePath` > `AccessTokenPath` — the "File" makes it unambiguous that this is a file system path, not a URL or API path. Rule: when a parameter name could be ambiguous between file path, URL, or API endpoint, include the disambiguating word.
+
+### 202. SupportedPlatforms Attribute on Components
+When refactoring a component that previously used runtime platform checks (`if/else throw PlatformNotSupportedException`), add `[SupportedPlatforms("linux-arm64,linux-x64,win-arm64,win-x64")]` attribute to the class. The second bool parameter (`true`) means "exact match required." This moves platform validation to initialization time rather than runtime failure.
+
+### 203. CLI Option Alias Reduction Pattern
+When consolidating CLI options, remove aliases to keep exactly 1 option name for value-requiring options: `--token` (remove `--access-token`), `--tenant-id` (remove `--tid`), `--certificate-name` + `--cert-name` (keep 2 for this one since both are clear). In `OptionFactory.cs`, this means reducing the `string[]` array in `new Option<string>(new string[] { ... })`.
+
+### 204. Test Platform Parameterization Pattern
+When a component adds `[SupportedPlatforms]` for both Windows and Linux, existing tests should add `[TestCase(PlatformID.Win32NT)]` + `[TestCase(PlatformID.Unix)]` parameterization. Tests that were Windows-only (`this.mockFixture.Setup(PlatformID.Win32NT)`) should become parameterized with `mockFixture.Setup(platform)`. Also rename test methods to match unified component methods: `ExecuteAsyncInstallsCertificateOnWindows` → `ExecuteAsync_InstallsCertificateOnWindows`.
+
+### 205. Dead Code Removal on Feature Change
+When removing a feature (implicit tenantId parsing), also remove: (1) the utility method (`TryParseMicrosoftEntraTenantIdReference`), (2) its unit tests (`EndpointUtilityTests` -32 lines), (3) any conditional logic that used it. Don't leave orphaned code. This is a completeness check: if you remove feature X, grep for all references to X's implementation methods and delete them too.
+
+### 206. OptionFactory Pattern for New CLI Options
+New CLI options follow this template:
+```csharp
+public static Option CreateXxxOption(bool required = false, object defaultValue = null)
+{
+    Option<string> option = new Option<string>(new string[] { "--kebab-name" })
+    {
+        Name = "ParameterName",  // Must match the component property name
+        Description = "...",
+        ArgumentHelpName = "path|name|value",
+        AllowMultipleArgumentsPerToken = false
+    };
+    OptionFactory.SetOptionRequirements(option, required, defaultValue);
+    return option;
+}
+```
+Key: `Name` property MUST match the `Parameters` dictionary key used by the component.
+
+### 207. Key Vault Certificate Retrieval: Secret vs Certificate Client
+For PFX (private key) downloads, use `SecretClient.GetSecretAsync` → Base64 decode → `CertificateLoaderHelper.LoadPkcs12`. For public cert only, use `CertificateClient.GetCertificateAsync` → `.Cer` bytes → `CertificateLoaderHelper.LoadPublic`. The old approach used `CertificateClient.DownloadCertificateAsync` for PFX but this was less reliable. The new approach separates the two paths cleanly.
+
+### 208. .NET Version Conditional Compilation → Helper Method
+When code has `#if NET9_0_OR_GREATER` / `#elif NET8_0_OR_GREATER` blocks for the same operation, extract to a helper/extension method that encapsulates the version check. `CertificateLoaderHelper.LoadPublic` and `LoadPkcs12` encapsulate `X509CertificateLoader` (NET9+) vs `new X509Certificate2()` (NET8). This keeps the calling code clean and centralizes version-specific logic.
+
+### 209. Bootstrap Command → Profile Parameter Wiring
+Bootstrap CLI options wire to profile parameters through `BootstrapCommand.SetupCertificateInstallation()`. Pattern: (1) CLI option populates command property, (2) `SetupCertificateInstallation()` maps property → `this.Parameters["X"] = this.Y`, (3) profile references `$.Parameters.X`. Only set parameter if non-empty: `if (!string.IsNullOrWhiteSpace(this.X)) { this.Parameters["X"] = this.X; }`
+
+### 210. Catch Block Consolidation
+When multiple catch blocks handle the same exception type with the same error reason, consolidate. KeyVaultManager removed a generic `catch (Exception ex)` that duplicated the `RequestFailedException` handler's behavior. Rule: only keep distinct catch blocks if they handle different exception types with genuinely different recovery/error logic.
+
+### 211. Test Verification: Mock.Verify for Client Path Distinction
+When a method uses different clients for different code paths (SecretClient for PFX, CertificateClient for public cert), tests should verify the correct client was called: `this.secretClientMock.Verify(c => c.GetSecretAsync(...), Times.Once)` for PFX path, `this.certificateClientMock.Verify(c => c.GetCertificateAsync(...), Times.Once)` for public path. Also verify the result properties: `Assert.IsTrue(result.HasPrivateKey)` + `Assert.IsNotNull(result.Export(...))`.
+
+### 212. BootstrapCommand Test Pattern: Parameter Count Assertion
+Bootstrap tests verify the exact parameter count after setup: `Assert.AreEqual(command.Parameters.Count, 3)`. This catches accidental parameter leakage — if a new parameter is wired but shouldn't be (e.g., optional param when empty), the count assertion fails. Include this in bootstrap tests.
