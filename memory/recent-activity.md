@@ -1,11 +1,20 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-08*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-15*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| 1c4a19cc | 2026-03-13 | erica vellanoweth | bug fixes (#653) |
+| 3e96703a | 2026-03-12 | brdeyo | Add feature to enable defining environment layout directly on the command line in addition |
+| 67d86559 | 2026-03-12 | brdeyo | Remove reference to 'clean' subcommand from documentation. It is no longer a standalone co |
+| cbbb4504 | 2026-03-12 | erica vellanoweth | HammerDB fixes, + TPCH implementation (#604) |
+| 2d869c1d | 2026-03-12 | Alex Williams-Ferreira | Fix AMD GPU driver installation failure on Ubuntu 22.04 (jammy) (#652) |
+| e7a52a04 | 2026-03-12 | brdeyo | CommandBaseTests can run on Windows build servers only. |
+| 167bb94f | 2026-03-12 | brdeyo | Update overview documentation to include Windows support notice for SPEC CPU. |
+| ad667624 | 2026-03-10 | brdeyo | Introduce --archive-logs feature. Add SupportedPlatform attributes to additional workloads |
+| c18baf2a | 2026-03-08 | brdeyo | Move to version 3.0. Complete overhaul/cleanup of supported command line option variations |
 | 9fcc02a7 | 2026-03-06 | brdeyo | Add support for token file to 'bootstap' subcommand. |
 | ddaf7184 | 2026-03-06 | brdeyo | Few updates to documentation for bootstrap and get-token subcommands. |
 | fd8b8101 | 2026-03-06 | brdeyo | Refactor Key Vault integration to follow existing 'store' patterns. Update bootstrap comma |
@@ -47,15 +56,6 @@
 | 3821dc9f | 2025-11-20 | brdeyo | Upversion to 2.1.47. |
 | 9b2229c9 | 2025-11-20 | brdeyo | Update 'ProcessResults' telemetry to include file paths. |
 | db0fbdd9 | 2025-11-17 | Sai Bulusu | FIO deleting test verification files with an empty path (#597) |
-| 48d1ba29 | 2025-11-17 | brdeyo | Refactor Prime95 to use changes made in internal repo. |
-| 8b050c0c | 2025-11-17 | nmalkapuram | DSB fix for ubuntu 24.04 (#593) |
-| 092c56d6 | 2025-11-13 | Bryan DeYoung | Update status code error message to adopt standardized conventions (i.e. toolset + code de |
-| 4540d31e | 2025-11-12 | Bryan DeYoung | Implement support for mapping exit codes to status codes for integration with orchestratio |
-| 3d47f227 | 2025-11-11 | **Rakesh** | Bump version from 2.1.41 to 2.1.42 (#594) |
-| 8144ee52 | 2025-11-04 | Sai Bulusu | Minor documentation fix for --event-hub flag. (#591) |
-| 89cf3770 | 2025-11-04 | nmalkapuram | DSB supported platform fix (#592) |
-| 9c38b373 | 2025-10-29 | **Rakesh** | Bug fix for ParamON (#588) |
-| 14bcfe1f | 2025-10-27 | brdeyo | Make proxy logger public so that it can be used in Vega OOB monitor scenarios. |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **2.1.62**
+- **3.0.1**
