@@ -1,11 +1,16 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-15*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-22*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| f1d5410a | 2026-03-20 | Sai Bulusu | Removing g++ and gcov alternatives in CompilerInstallation (#660) |
+| 600d374d | 2026-03-18 | erica vellanoweth | inc version (#658) |
+| 736734a5 | 2026-03-16 | Nirjan Chapagain | [Bug Fix] Remove mandatory layout (#654) |
+| f450e444 | 2026-03-16 | erica vellanoweth | updating package version (#656) |
+| 3c48bab4 | 2026-03-16 | erica vellanoweth | sysbench-bug-fixes |
 | 1c4a19cc | 2026-03-13 | erica vellanoweth | bug fixes (#653) |
 | 3e96703a | 2026-03-12 | brdeyo | Add feature to enable defining environment layout directly on the command line in addition |
 | 67d86559 | 2026-03-12 | brdeyo | Remove reference to 'clean' subcommand from documentation. It is no longer a standalone co |
@@ -51,11 +56,6 @@
 | d9dd817d | 2026-01-11 | Bryan DeYoung | Add long-term certificate for unit/functional testing. Note that this certificate is only  |
 | d6485eea | 2026-01-07 | **Rakesh** |  Added "Size" property to the disks for Windows systems (#612) |
 | f7563a1a | 2025-12-13 | Bryan DeYoung | Add support for handling kernel-level race condition on process finalization that causes e |
-| 57fcce31 | 2025-12-13 | Nirjan | Add telemetry output splitting support for large process logs (#582) |
-| bed33532 | 2025-12-03 | **Rakesh** | Change all profiles to use timespans (vs. integers) when representing time ranges (#601) |
-| 3821dc9f | 2025-11-20 | brdeyo | Upversion to 2.1.47. |
-| 9b2229c9 | 2025-11-20 | brdeyo | Update 'ProcessResults' telemetry to include file paths. |
-| db0fbdd9 | 2025-11-17 | Sai Bulusu | FIO deleting test verification files with an empty path (#597) |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.0.1**
+- **3.0.3**
