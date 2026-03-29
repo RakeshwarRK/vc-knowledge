@@ -1,11 +1,14 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-22*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-29*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| fb71558e | 2026-03-26 | Alex Williams-Ferreira | update version for nasfix QoS (#663) |
+| 182f2c49 | 2026-03-25 | erica vellanoweth | creating a stripe disk dependency. (#659) |
+| af705327 | 2026-03-24 | Alex Williams-Ferreira | Parameterize NAS Parallel Benchmark profile for ThreadCount and Bench… (#662) |
 | f1d5410a | 2026-03-20 | Sai Bulusu | Removing g++ and gcov alternatives in CompilerInstallation (#660) |
 | 600d374d | 2026-03-18 | erica vellanoweth | inc version (#658) |
 | 736734a5 | 2026-03-16 | Nirjan Chapagain | [Bug Fix] Remove mandatory layout (#654) |
@@ -53,9 +56,6 @@
 | 6ae53c35 | 2026-01-22 | Sai Bulusu | FIO verify file path (#623) |
 | e3347919 | 2026-01-17 | Sai Bulusu | Speccpu limitations on Windows & specifying benchmarks in SPECCpuExecutor (#619) |
 | 47650fff | 2026-01-15 | Bryan DeYoung | Bug fix. Change process kill logic back to original logic for Geekbench. (#618) |
-| d9dd817d | 2026-01-11 | Bryan DeYoung | Add long-term certificate for unit/functional testing. Note that this certificate is only  |
-| d6485eea | 2026-01-07 | **Rakesh** |  Added "Size" property to the disks for Windows systems (#612) |
-| f7563a1a | 2025-12-13 | Bryan DeYoung | Add support for handling kernel-level race condition on process finalization that causes e |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.0.3**
+- **3.0.4**
