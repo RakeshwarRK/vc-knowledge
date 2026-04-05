@@ -1,11 +1,21 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-03-29*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-05*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| 3ffe2e92 | 2026-04-03 | Alex Williams-Ferreira | Add tuning parameters to stressapttest to replace blank commandline in profile (#673) |
+| dd0fbc4d | 2026-04-03 | brdeyo | Version to 3.0.9 |
+| 12423cfd | 2026-04-02 | Bryan DeYoung | Rollback changes to ExecuteCommand and ExecuteCommandMonitor. Add script package execution |
+| 7953f8d4 | 2026-04-01 | brdeyo | Update HPLinpack profile to remove the performance libraries package. Add profiles for CPU |
+| 6b6ea673 | 2026-03-31 | brdeyo | Refactor HPLinpack profiles to be separated by vendor performance libraries. |
+| 4fddd321 | 2026-04-01 | Rudra Pratap SIngh | Bump version to 3.0.7 (#670) |
+| 56bb32a4 | 2026-03-31 | Alex Williams-Ferreira | updated blender launcher version due to (#667) |
+| 0fadee1c | 2026-03-31 | Rudra Pratap SIngh | Fix WindowsPerformanceCounter OOM on ARM64 >64 LP systems (#661) |
+| 4b55e790 | 2026-03-31 | Bryan DeYoung | Updates to support 'low code' integration with SDK scripts. (#668) |
+| 9da3e810 | 2026-03-29 | brdeyo | Add System.CommandLine library quirk workaround (&quot;) support for parameters and metada |
 | fb71558e | 2026-03-26 | Alex Williams-Ferreira | update version for nasfix QoS (#663) |
 | 182f2c49 | 2026-03-25 | erica vellanoweth | creating a stripe disk dependency. (#659) |
 | af705327 | 2026-03-24 | Alex Williams-Ferreira | Parameterize NAS Parallel Benchmark profile for ThreadCount and Bench… (#662) |
@@ -46,16 +56,6 @@
 | fb94a149 | 2026-02-09 | deep1712 | Bumping to 2.1.54 (#634) |
 | 8914b5ed | 2026-02-05 | deep1712 | Adding Lat Mem read workload (#630) |
 | e7bd9e41 | 2026-02-04 | brdeyo | Update version of VC to 2.1.53 |
-| e2b00302 | 2026-02-03 | Bryan DeYoung | Ensure that the core/fundamental directories (e.g. logs, packages) are created up front to |
-| ef4ce85a | 2026-01-28 | Sai Bulusu | superbench NVIDIA A100 setup profile, ansible-core, and disk space (#626) |
-| fa567e34 | 2026-01-27 | Sai Bulusu | User-defined Benchmarks parameter for speccpu profiles (#628) |
-| 85a3c8af | 2026-01-26 | **Rakesh** | Onboarding NCPS workload as CPS is being deprecated. (#625) |
-| 1364dbff | 2026-01-24 | Bryan DeYoung | Update to better handle path type (absolute, relative) identifications. Handle nested quot |
-| 00f4f5f8 | 2026-01-23 | **Rakesh** | Enable defining specific logical processors against which to run a given process. (#617) |
-| cc392eab | 2026-01-22 | Sai Bulusu | Upversion to 2.1.51 (#624) |
-| 6ae53c35 | 2026-01-22 | Sai Bulusu | FIO verify file path (#623) |
-| e3347919 | 2026-01-17 | Sai Bulusu | Speccpu limitations on Windows & specifying benchmarks in SPECCpuExecutor (#619) |
-| 47650fff | 2026-01-15 | Bryan DeYoung | Bug fix. Change process kill logic back to original logic for Geekbench. (#618) |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.0.4**
+- **3.0.9**
