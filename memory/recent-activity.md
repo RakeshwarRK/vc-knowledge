@@ -1,11 +1,22 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-05*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-12*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| 1b841d11 | 2026-04-11 | Alex Williams-Ferreira | Fix HammerDB/PostgreSQL: use hex password to avoid TCL parsing error (#686) |
+| 08d1fc18 | 2026-04-09 | brdeyo | Fix a few HTML mistakes in the markdown docs. |
+| 04ac5a40 | 2026-04-09 | brdeyo | Updates to documentation to fix mistakes (e.g. command line option names, misspellings, gr |
+| 5fbf5fb3 | 2026-04-09 | brdeyo | Add parameter to EXECUTE-SCRIPT profile for defining container. In Vega Proxy API (vs. pac |
+| ffb60f34 | 2026-04-09 | Ankit Sharma | Added SetDiskSanPolicy dependency to enable writable JBOD disks on Windows (#679) |
+| 9fc2a96f | 2026-04-09 | imadityaa | Fix LogProcessToFileAsync (#680) |
+| f7406c3e | 2026-04-07 | Bryan DeYoung | Add --show-tcp-retrans flag to NTttcp client command line for Linux scenarios. Feedback fr |
+| 11967463 | 2026-04-07 | Tingmao Wang | Fix Packaging/dockerfiles/linux-x64.dockerfile and update to use Ubuntu 22.04 (#437) |
+| 1d1133a0 | 2026-04-06 | Alex Williams-Ferreira | Update version from 3.0.9 -> 3.0.10 (#677) |
+| e279169f | 2026-04-06 | Alex Williams-Ferreira | Change BlenderVersion from 3.6.0 to 4.2.0 in PERF-BLENDER-AMD.json. This bumps the benchma |
+| a9fb4060 | 2026-04-06 | Alex Williams-Ferreira | Fix Sysbench TPCC PopulateDatabase passing --warehouses 0 on small VMs (#675) |
 | 3ffe2e92 | 2026-04-03 | Alex Williams-Ferreira | Add tuning parameters to stressapttest to replace blank commandline in profile (#673) |
 | dd0fbc4d | 2026-04-03 | brdeyo | Version to 3.0.9 |
 | 12423cfd | 2026-04-02 | Bryan DeYoung | Rollback changes to ExecuteCommand and ExecuteCommandMonitor. Add script package execution |
@@ -45,17 +56,6 @@
 | 4b76bdd6 | 2026-03-02 | Alex Williams-Ferreira | Added check to see if path bashrc path exists (#649) |
 | cbfd372c | 2026-02-26 | brdeyo | Address a range of bugs/issues. Metrics CSV flush on exit. Network workload to use scripts |
 | 4b1108af | 2026-02-27 | Nirjan Chapagain | [Feature] Enable get-token and bootstrap certificate from Key Vault (#613) |
-| e0610a67 | 2026-02-23 | **Rakesh** | Enabled windows ProcessorAffinity support (#629) |
-| ca6bab4b | 2026-02-20 | deep1712 | Bumping version to 2.1.57 (#646) |
-| 4814000a | 2026-02-20 | deep1712 | Updating Lat Mem Rd profile and executor (#642) |
-| 4f35e599 | 2026-02-20 | manuelrod | Use QueueDepth in diskspd MetricScenario (#645) |
-| 0c8476a5 | 2026-02-19 | v-safilho | Consolidate Sysbench command arguments string (#570) |
-| 8ac1445b | 2026-02-18 | imadityaa | add stateDir in profile expression evaluators (#643) |
-| e1657ba2 | 2026-02-17 | Nirjan Chapagain | [New VirtualClientComponent] Create Response File Component (#641) |
-| 880320f1 | 2026-02-11 | deep1712 | Log Process Details File Upload Fixing FolderName and bumping version (#635) |
-| fb94a149 | 2026-02-09 | deep1712 | Bumping to 2.1.54 (#634) |
-| 8914b5ed | 2026-02-05 | deep1712 | Adding Lat Mem read workload (#630) |
-| e7bd9e41 | 2026-02-04 | brdeyo | Update version of VC to 2.1.53 |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.0.9**
+- **3.0.15**
