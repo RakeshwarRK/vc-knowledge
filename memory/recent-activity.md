@@ -1,11 +1,20 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-12*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-19*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| e6921c33 | 2026-04-18 | brdeyo | Move to version 3.1.0 post-production release. |
+| e513cc7e | 2026-04-17 | brdeyo | Production version 3.0 |
+| 3cf59b4c | 2026-04-17 | brdeyo | Rollback OpenSSL to 3.0.0 due to breaks found on ARM64 systems. |
+| 5c0ef172 | 2026-04-16 | AlexWFMS | updated documentation for aspnet to not support windows (#693) |
+| e8995439 | 2026-04-16 | brdeyo | Update ASP.NET profiles that run Wrk executor to install numactl and to denote supported p |
+| e250ddec | 2026-04-15 | AlexWFMS | Add Blender GPU/CPU performance workload profile (#691) |
+| c61a1869 | 2026-04-13 | **Rakesh** | Fix Wrk CPU affinity process invocation and ParametersOn condition evaluation (#690) |
+| 3ccab7ac | 2026-04-13 | **Rakesh** | Added Nginx & ASP.NET workloads (#687) |
+| a223a641 | 2026-04-13 | **Rakesh** | Update version to 3.5.0 (#685) |
 | 1b841d11 | 2026-04-11 | Alex Williams-Ferreira | Fix HammerDB/PostgreSQL: use hex password to avoid TCL parsing error (#686) |
 | 08d1fc18 | 2026-04-09 | brdeyo | Fix a few HTML mistakes in the markdown docs. |
 | 04ac5a40 | 2026-04-09 | brdeyo | Updates to documentation to fix mistakes (e.g. command line option names, misspellings, gr |
@@ -47,15 +56,6 @@
 | 9fcc02a7 | 2026-03-06 | brdeyo | Add support for token file to 'bootstap' subcommand. |
 | ddaf7184 | 2026-03-06 | brdeyo | Few updates to documentation for bootstrap and get-token subcommands. |
 | fd8b8101 | 2026-03-06 | brdeyo | Refactor Key Vault integration to follow existing 'store' patterns. Update bootstrap comma |
-| f8a337cc | 2026-03-05 | brdeyo | Refactor LMbench workloads to provide clearer metrics across different memory sweeps. Fix  |
-| 6ff0a27e | 2026-03-04 | **Rakesh** | Simplify test framework with process tracking and assertion helpers (#647) |
-| fccc4a76 | 2026-03-04 | erica vellanoweth | Sysbench changes, formalizing a database population design (#651) |
-| 3ba552b0 | 2026-03-02 | brdeyo | Few more fixes to handle eccentricities with SockPerf and Latte workloads. |
-| 1373da0a | 2026-02-28 | brdeyo | Change SpecCpuExecutor to parse metrics from CSV results. |
-| 4ff0499b | 2026-03-03 | **Rakesh** | Standardized support for filtering metrics using verbosity levels, inclusion and exclusion |
-| 4b76bdd6 | 2026-03-02 | Alex Williams-Ferreira | Added check to see if path bashrc path exists (#649) |
-| cbfd372c | 2026-02-26 | brdeyo | Address a range of bugs/issues. Metrics CSV flush on exit. Network workload to use scripts |
-| 4b1108af | 2026-02-27 | Nirjan Chapagain | [Feature] Enable get-token and bootstrap certificate from Key Vault (#613) |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.0.15**
+- **3.1.0**
