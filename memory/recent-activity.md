@@ -1,11 +1,15 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-19*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-26*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| d949dbaf | 2026-04-24 | erica vellanoweth | Fix disk detection after LVM striping and update database workload profiles (#674) |
+| b3279395 | 2026-04-24 | Copilot | Refactor copilot-instructions.md into focused instruction files with PR review guidelines  |
+| 3b0174bf | 2026-04-23 | AlexWFMS | Mask apt-daily timers in SPEC CPU profiles to prevent VC restarts on Ubuntu 24.04 (#694) |
+| f290a2ea | 2026-04-22 | brdeyo | Add support for URIs that contain an API key. |
 | e6921c33 | 2026-04-18 | brdeyo | Move to version 3.1.0 post-production release. |
 | e513cc7e | 2026-04-17 | brdeyo | Production version 3.0 |
 | 3cf59b4c | 2026-04-17 | brdeyo | Rollback OpenSSL to 3.0.0 due to breaks found on ARM64 systems. |
@@ -52,10 +56,6 @@
 | e7a52a04 | 2026-03-12 | brdeyo | CommandBaseTests can run on Windows build servers only. |
 | 167bb94f | 2026-03-12 | brdeyo | Update overview documentation to include Windows support notice for SPEC CPU. |
 | ad667624 | 2026-03-10 | brdeyo | Introduce --archive-logs feature. Add SupportedPlatform attributes to additional workloads |
-| c18baf2a | 2026-03-08 | brdeyo | Move to version 3.0. Complete overhaul/cleanup of supported command line option variations |
-| 9fcc02a7 | 2026-03-06 | brdeyo | Add support for token file to 'bootstap' subcommand. |
-| ddaf7184 | 2026-03-06 | brdeyo | Few updates to documentation for bootstrap and get-token subcommands. |
-| fd8b8101 | 2026-03-06 | brdeyo | Refactor Key Vault integration to follow existing 'store' patterns. Update bootstrap comma |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.1.0**
+- **3.1.2**
