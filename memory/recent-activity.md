@@ -1,11 +1,14 @@
 # VC Memory — Recent Activity
 
-*Auto-updated weekly by GitHub Actions. Last scan: 2026-04-26*
+*Auto-updated weekly by GitHub Actions. Last scan: 2026-05-03*
 
 ## Recent Commits (last 50)
 
 | SHA | Date | Author | Summary |
 |-----|------|--------|---------|
+| 138dce1d | 2026-05-01 | **Rakesh** | Fix SPEC CPU build failure on GCC 15 (#688) |
+| 60834368 | 2026-04-30 | erica vellanoweth | Bump version from 3.1.2 to 3.2.0 (#701) |
+| 22fe6339 | 2026-04-28 | Copilot | Emit explicit telemetry when workload execution is canceled due to experiment timeout (#69 |
 | d949dbaf | 2026-04-24 | erica vellanoweth | Fix disk detection after LVM striping and update database workload profiles (#674) |
 | b3279395 | 2026-04-24 | Copilot | Refactor copilot-instructions.md into focused instruction files with PR review guidelines  |
 | 3b0174bf | 2026-04-23 | AlexWFMS | Mask apt-daily timers in SPEC CPU profiles to prevent VC restarts on Ubuntu 24.04 (#694) |
@@ -53,9 +56,6 @@
 | 67d86559 | 2026-03-12 | brdeyo | Remove reference to 'clean' subcommand from documentation. It is no longer a standalone co |
 | cbbb4504 | 2026-03-12 | erica vellanoweth | HammerDB fixes, + TPCH implementation (#604) |
 | 2d869c1d | 2026-03-12 | Alex Williams-Ferreira | Fix AMD GPU driver installation failure on Ubuntu 22.04 (jammy) (#652) |
-| e7a52a04 | 2026-03-12 | brdeyo | CommandBaseTests can run on Windows build servers only. |
-| 167bb94f | 2026-03-12 | brdeyo | Update overview documentation to include Windows support notice for SPEC CPU. |
-| ad667624 | 2026-03-10 | brdeyo | Introduce --archive-logs feature. Add SupportedPlatform attributes to additional workloads |
 
 ## Recently Merged PRs (last 50)
 
@@ -114,4 +114,4 @@
 
 ## Current Version
 
-- **3.1.2**
+- **3.2.1**
